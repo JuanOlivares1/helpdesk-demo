@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { ticketApi, getApiError } from "../api";
+import { getApiError, ticketApi } from "../api";
+import { PRIORITY_OPTIONS } from "../ticket-meta";
+import type { TicketPriority } from "../types";
 
 interface TicketFormProps {
   onSuccess: () => void;
@@ -8,12 +10,14 @@ interface TicketFormProps {
 export default function TicketForm({ onSuccess }: TicketFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("medium");
+  const [priority, setPriority] = useState<TicketPriority>("medium");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSubmitting(true);
 
     try {
       await ticketApi.create(title, description, priority);
@@ -23,6 +27,8 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
       onSuccess();
     } catch (err) {
       setError(getApiError(err, "Failed to create ticket"));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -31,7 +37,7 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
       onSubmit={handleSubmit}
       style={{
         maxWidth: "500px",
-        margin: "1rem auto",
+        margin: "0 auto 1rem",
         padding: "1rem",
         border: "1px solid #ddd",
         borderRadius: "8px",
@@ -88,31 +94,34 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
       <div style={{ marginBottom: "0.5rem" }}>
         <select
           value={priority}
-          onChange={(e) => setPriority(e.target.value)}
+          onChange={(e) => setPriority(e.target.value as TicketPriority)}
           style={{
             padding: "0.5rem",
             border: "1px solid #ccc",
             borderRadius: "4px",
           }}
         >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
+          {PRIORITY_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
       </div>
 
       <button
         type="submit"
+        disabled={submitting}
         style={{
           padding: "0.5rem 1rem",
-          background: "#3498db",
+          background: submitting ? "#85c1e9" : "#3498db",
           color: "white",
           border: "none",
           borderRadius: "4px",
-          cursor: "pointer",
+          cursor: submitting ? "not-allowed" : "pointer",
         }}
       >
-        Create Ticket
+        {submitting ? "Creating..." : "Create Ticket"}
       </button>
     </form>
   );

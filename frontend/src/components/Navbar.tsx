@@ -1,12 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/useAuth";
 
 export default function Navbar() {
+  const { user, token, logout } = useAuth();
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+    logout();
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -33,7 +34,14 @@ export default function Navbar() {
           </Link>
         )}
       </div>
-      <div>
+
+      <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+        {token && user && (
+          <span style={{ color: "#ccc", fontSize: "0.9rem" }}>
+            {user.email} ({user.role})
+          </span>
+        )}
+
         {token ? (
           <button
             onClick={handleLogout}
@@ -49,16 +57,17 @@ export default function Navbar() {
             Logout
           </button>
         ) : (
-          <Link
-            to="/login"
-            style={{
-              color: "#ccc",
-              textDecoration: "none",
-              marginRight: "1rem",
-            }}
-          >
-            Login
-          </Link>
+          <>
+            <Link to="/login" style={{ color: "#ccc", textDecoration: "none" }}>
+              Login
+            </Link>
+            <Link
+              to="/register"
+              style={{ color: "#ccc", textDecoration: "none" }}
+            >
+              Register
+            </Link>
+          </>
         )}
       </div>
     </nav>

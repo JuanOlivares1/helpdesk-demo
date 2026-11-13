@@ -1,21 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ticketApi, getApiError } from "../api";
-
-interface Ticket {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  created_at: string;
-}
-
-interface Comment {
-  id: number;
-  body: string;
-  created_at: string;
-}
+import { useNavigate, useParams } from "react-router-dom";
+import { getApiError, ticketApi } from "../api";
+import { statusColor } from "../ticket-meta";
+import type { Comment, Ticket } from "../types";
 
 export default function TicketDetail() {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +10,8 @@ export default function TicketDetail() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [error, setError] = useState("");
+  const [commentError, setCommentError] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,11 +21,15 @@ export default function TicketDetail() {
 
     const loadTicket = async () => {
       try {
-        const ticketRes = await ticketApi.get(Number(id));
-        const commentsRes = await ticketApi.getComments(Number(id));
+        const [ticketResponse, commentsResponse] = await Promise.all([
+          ticketApi.get(Number(id)),
+          ticketApi.getComments(Number(id)),
+        ]);
+
         if (!cancelled) {
-          setTicket(ticketRes.data.ticket);
-          setComments(commentsRes.data.comments);
+          setTicket(ticketResponse.data.ticket);
+          setComments(commentsResponse.data.comments);
+          setError("");
         }
       } catch (err) {
         if (!cancelled) {
@@ -56,26 +49,34 @@ export default function TicketDetail() {
     e.preventDefault();
     if (!id || !newComment.trim()) return;
 
+    setCommentError("");
+    setSubmittingComment(true);
+
     try {
-      await ticketApi.addComment(Number(id), newComment);
+      await ticketApi.addComment(Number(id), newComment.trim());
       setNewComment("");
-      const commentsRes = await ticketApi.getComments(Number(id));
-      setComments(commentsRes.data.comments);
+      const commentsResponse = await ticketApi.getComments(Number(id));
+      setComments(commentsResponse.data.comments);
     } catch (err) {
-      setError(getApiError(err, "Failed to add comment"));
+      setCommentError(getApiError(err, "Failed to add comment"));
+    } finally {
+      setSubmittingComment(false);
     }
   };
 
-  if (error)
+  if (error) {
     return (
       <div style={{ color: "#e74c3c", textAlign: "center", marginTop: "2rem" }}>
         {error}
       </div>
     );
-  if (!ticket)
+  }
+
+  if (!ticket) {
     return (
       <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</div>
     );
+  }
 
   return (
     <div style={{ maxWidth: "800px", margin: "1rem auto", padding: "1rem" }}>
@@ -100,12 +101,7 @@ export default function TicketDetail() {
           style={{
             padding: "0.25rem 0.5rem",
             borderRadius: "4px",
-            background:
-              ticket.status === "open"
-                ? "#e74c3c"
-                : ticket.status === "in_progress"
-                ? "#f39c12"
-                : "#2ecc71",
+            background: statusColor(ticket.status),
             color: "white",
           }}
         >
@@ -143,10 +139,25 @@ export default function TicketDetail() {
         >
           <p>{comment.body}</p>
           <small style={{ color: "#999" }}>
+            User #{comment.author_id} ·{" "}
             {new Date(comment.created_at).toLocaleString()}
           </small>
         </div>
       ))}
+
+      {commentError && (
+        <div
+          style={{
+            background: "#fdecea",
+            color: "#e74c3c",
+            padding: "0.5rem",
+            borderRadius: "4px",
+            marginTop: "1rem",
+          }}
+        >
+          {commentError}
+        </div>
+      )}
 
       <form onSubmit={handleAddComment} style={{ marginTop: "1.5rem" }}>
         <textarea
@@ -164,16 +175,21 @@ export default function TicketDetail() {
         />
         <button
           type="submit"
+          disabled={submittingComment || !newComment.trim()}
           style={{
             padding: "0.5rem 1rem",
-            background: "#3498db",
+            background:
+              submittingComment || !newComment.trim() ? "#85c1e9" : "#3498db",
             color: "white",
             border: "none",
             borderRadius: "4px",
-            cursor: "pointer",
+            cursor:
+              submittingComment || !newComment.trim()
+                ? "not-allowed"
+                : "pointer",
           }}
         >
-          Add Comment
+          {submittingComment ? "Adding..." : "Add Comment"}
         </button>
       </form>
     </div>
