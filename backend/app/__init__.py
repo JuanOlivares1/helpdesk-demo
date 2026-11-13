@@ -1,47 +1,57 @@
-import os
+"""Fábrica de la aplicación Flask."""
+
 from flask import Flask
-from dotenv import load_dotenv
-from app.extensions import db, jwt, migrate
 from flask_cors import CORS
 
-load_dotenv()
+from app.config import get_config
+from app.extensions import db, jwt, migrate
+from app.logging import configure_logging, register_request_logging
 
 
-def create_app(test_config=None):
+def _parse_cors_origins(value: str | list[str]) -> str | list[str]:
+    """Normaliza los orígenes CORS configurados."""
+    if isinstance(value, str):
+        if value.strip() == "*":
+            return "*"
+        return [origin.strip() for origin in value.split(",") if origin.strip()]
+    return value
+
+
+def create_app(test_config: dict | None = None) -> Flask:
+    """Crea y configura la aplicación Flask.
+
+    Args:
+        test_config: Configuración adicional para tests. Se aplica después de
+            la configuración del entorno y tiene prioridad sobre ella.
+    """
     app = Flask(__name__)
 
-    # Config base
-    default_config = {
-        'SECRET_KEY': os.environ.get('SECRET_KEY', 'dev-secret-key'),
-        'SQLALCHEMY_DATABASE_URI': os.environ.get('DATABASE_URL', 'sqlite:///helpdesk.db'),
-        'SQLALCHEMY_TRACK_MODIFICATIONS': False,
-        'JWT_SECRET_KEY': os.environ.get('JWT_SECRET_KEY', 'jwt-secret-string'),
-        'JWT_ACCESS_TOKEN_EXPIRES': 3600
-    }
-
+    config_name = "testing" if test_config and test_config.get("TESTING") else None
+    app.config.from_object(get_config(config_name))
     if test_config:
-        default_config.update(test_config)
+        app.config.update(test_config)
 
-    app.config.update(default_config)
+    configure_logging(app)
 
-    # Extensions
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
-    CORS(app)
+    CORS(app, origins=_parse_cors_origins(app.config["CORS_ORIGINS"]))
 
-    # Routes
     from app.routes.auth import auth_bp
     from app.routes.tickets import tickets_bp
 
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(tickets_bp, url_prefix='/api/tickets')
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    app.register_blueprint(tickets_bp, url_prefix="/api/tickets")
 
-    @app.route('/health')
-    def health():
-        return {'status': 'ok'}
+    register_request_logging(app)
 
-    with app.app_context():
-        db.create_all()
+    @app.route("/health")
+    def health() -> dict[str, str]:
+        return {"status": "ok"}
+
+    if app.config.get("CREATE_TABLES"):
+        with app.app_context():
+            db.create_all()
 
     return app
