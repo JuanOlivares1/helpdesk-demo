@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getApiError, ticketApi } from "../api";
 import { useAuth } from "../auth/useAuth";
-import { STATUS_OPTIONS, statusColor } from "../ticket-meta";
+import {
+  PRIORITY_BADGE_CLASS,
+  STATUS_BADGE_CLASS,
+  STATUS_OPTIONS,
+} from "../ticket-meta";
 import type { Ticket, TicketStatus } from "../types";
 import TicketForm from "./TicketForm";
 
@@ -57,28 +61,16 @@ export default function TicketList() {
   };
 
   return (
-    <div style={{ maxWidth: "900px", margin: "1rem auto", padding: "1rem" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "1rem",
-          marginBottom: "1rem",
-        }}
-      >
-        <h2>Tickets</h2>
-        <div style={{ display: "flex", gap: "0.5rem" }}>
+    <div className="mx-auto max-w-5xl px-4 py-6">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-2xl font-semibold text-slate-900">Tickets</h2>
+        <div className="flex items-center gap-2">
           <select
+            className="input w-auto"
             value={statusFilter}
             onChange={(e) =>
               setStatusFilter(e.target.value as TicketStatus | "")
             }
-            style={{
-              padding: "0.5rem",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-            }}
           >
             <option value="">All Status</option>
             {STATUS_OPTIONS.map((option) => (
@@ -91,14 +83,7 @@ export default function TicketList() {
           {canCreate && (
             <button
               onClick={() => setShowForm((visible) => !visible)}
-              style={{
-                padding: "0.5rem 1rem",
-                background: "#3498db",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
+              className="btn btn-primary"
             >
               {showForm ? "Cancel" : "New Ticket"}
             </button>
@@ -108,107 +93,69 @@ export default function TicketList() {
 
       {showForm && <TicketForm onSuccess={handleCreated} />}
 
-      {error && (
-        <div
-          style={{
-            background: "#fdecea",
-            color: "#e74c3c",
-            padding: "0.5rem",
-            borderRadius: "4px",
-            marginBottom: "1rem",
-          }}
-        >
-          {error}
+      {error && <div className="alert alert-error">{error}</div>}
+
+      {loading ? (
+        <p className="py-8 text-center text-slate-500">Loading tickets...</p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          <table className="min-w-full divide-y divide-slate-200 text-sm">
+            <thead className="bg-slate-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  ID
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Title
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Priority
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Created
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 bg-white">
+              {tickets.map((ticket) => (
+                <tr
+                  key={ticket.id}
+                  onClick={() => navigate(`/ticket/${ticket.id}`)}
+                  className="cursor-pointer transition hover:bg-slate-50"
+                >
+                  <td className="px-4 py-3 text-slate-500">{ticket.id}</td>
+                  <td className="px-4 py-3 font-medium text-slate-900">
+                    {ticket.title}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`badge ${STATUS_BADGE_CLASS[ticket.status]}`}
+                    >
+                      {ticket.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`badge ${PRIORITY_BADGE_CLASS[ticket.priority]}`}
+                    >
+                      {ticket.priority}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-slate-500">
+                    {new Date(ticket.created_at).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {loading ? (
-        <p style={{ textAlign: "center", color: "#666" }}>Loading tickets...</p>
-      ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ background: "#f5f5f5" }}>
-              <th
-                style={{
-                  padding: "0.75rem",
-                  textAlign: "left",
-                  borderBottom: "1px solid #ddd",
-                }}
-              >
-                ID
-              </th>
-              <th
-                style={{
-                  padding: "0.75rem",
-                  textAlign: "left",
-                  borderBottom: "1px solid #ddd",
-                }}
-              >
-                Title
-              </th>
-              <th
-                style={{
-                  padding: "0.75rem",
-                  textAlign: "left",
-                  borderBottom: "1px solid #ddd",
-                }}
-              >
-                Status
-              </th>
-              <th
-                style={{
-                  padding: "0.75rem",
-                  textAlign: "left",
-                  borderBottom: "1px solid #ddd",
-                }}
-              >
-                Priority
-              </th>
-              <th
-                style={{
-                  padding: "0.75rem",
-                  textAlign: "left",
-                  borderBottom: "1px solid #ddd",
-                }}
-              >
-                Created
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {tickets.map((ticket) => (
-              <tr
-                key={ticket.id}
-                onClick={() => navigate(`/ticket/${ticket.id}`)}
-                style={{ cursor: "pointer", borderBottom: "1px solid #ddd" }}
-              >
-                <td style={{ padding: "0.75rem" }}>{ticket.id}</td>
-                <td style={{ padding: "0.75rem" }}>{ticket.title}</td>
-                <td style={{ padding: "0.75rem" }}>
-                  <span
-                    style={{
-                      padding: "0.25rem 0.5rem",
-                      borderRadius: "4px",
-                      background: statusColor(ticket.status),
-                      color: "white",
-                      fontSize: "0.8rem",
-                    }}
-                  >
-                    {ticket.status}
-                  </span>
-                </td>
-                <td style={{ padding: "0.75rem" }}>{ticket.priority}</td>
-                <td style={{ padding: "0.75rem" }}>
-                  {new Date(ticket.created_at).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
       {!loading && tickets.length === 0 && (
-        <p style={{ textAlign: "center", color: "#999" }}>No tickets found</p>
+        <p className="py-8 text-center text-slate-500">No tickets found</p>
       )}
     </div>
   );

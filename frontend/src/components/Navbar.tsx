@@ -11,64 +11,50 @@ export default function Navbar() {
   };
 
   return (
-    <nav
-      style={{
-        padding: "1rem",
-        background: "#1a1a2e",
-        color: "white",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-        <Link
-          to="/"
-          style={{ color: "white", textDecoration: "none", fontWeight: "bold" }}
-        >
-          HelpDesk
-        </Link>
-        {token && (
-          <Link to="/" style={{ color: "#ccc", textDecoration: "none" }}>
-            Tickets
+    <nav className="border-b border-slate-800 bg-slate-900 px-4 py-3 text-white">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link to="/" className="text-lg font-semibold hover:text-slate-200">
+            HelpDesk
           </Link>
-        )}
-      </div>
-
-      <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-        {token && user && (
-          <span style={{ color: "#ccc", fontSize: "0.9rem" }}>
-            {user.email} ({user.role})
-          </span>
-        )}
-
-        {token ? (
-          <button
-            onClick={handleLogout}
-            style={{
-              background: "#e74c3c",
-              color: "white",
-              border: "none",
-              padding: "0.5rem 1rem",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            Logout
-          </button>
-        ) : (
-          <>
-            <Link to="/login" style={{ color: "#ccc", textDecoration: "none" }}>
-              Login
-            </Link>
+          {token && (
             <Link
-              to="/register"
-              style={{ color: "#ccc", textDecoration: "none" }}
+              to="/"
+              className="text-sm text-slate-300 transition hover:text-white"
             >
-              Register
+              Tickets
             </Link>
-          </>
-        )}
+          )}
+        </div>
+
+        <div className="flex items-center gap-4">
+          {token && user && (
+            <span className="hidden text-sm text-slate-400 sm:inline">
+              {user.email} ({user.role})
+            </span>
+          )}
+
+          {token ? (
+            <button onClick={handleLogout} className="btn btn-danger">
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="text-sm text-slate-300 transition hover:text-white"
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="text-sm text-slate-300 transition hover:text-white"
+              >
+                Register
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

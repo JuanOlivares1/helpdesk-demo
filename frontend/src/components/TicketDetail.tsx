@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getApiError, ticketApi } from "../api";
-import { statusColor } from "../ticket-meta";
+import { PRIORITY_BADGE_CLASS, STATUS_BADGE_CLASS } from "../ticket-meta";
 import type { Comment, Ticket } from "../types";
 
 export default function TicketDetail() {
@@ -66,79 +66,55 @@ export default function TicketDetail() {
 
   if (error) {
     return (
-      <div style={{ color: "#e74c3c", textAlign: "center", marginTop: "2rem" }}>
-        {error}
+      <div className="mx-auto mt-8 max-w-3xl px-4">
+        <div className="alert alert-error">{error}</div>
       </div>
     );
   }
 
   if (!ticket) {
     return (
-      <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</div>
+      <p className="mt-8 text-center text-slate-500">Loading...</p>
     );
   }
 
   return (
-    <div style={{ maxWidth: "800px", margin: "1rem auto", padding: "1rem" }}>
-      <button
-        onClick={() => navigate("/")}
-        style={{
-          marginBottom: "1rem",
-          padding: "0.5rem",
-          background: "#eee",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer",
-        }}
-      >
+    <div className="mx-auto max-w-3xl px-4 py-6">
+      <button onClick={() => navigate("/")} className="btn btn-secondary mb-4">
         ← Back to tickets
       </button>
 
-      <h2>{ticket.title}</h2>
+      <h2 className="text-2xl font-semibold text-slate-900">{ticket.title}</h2>
 
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
-        <span
-          style={{
-            padding: "0.25rem 0.5rem",
-            borderRadius: "4px",
-            background: statusColor(ticket.status),
-            color: "white",
-          }}
-        >
+      <div className="my-4 flex items-center gap-2">
+        <span className={`badge ${STATUS_BADGE_CLASS[ticket.status]}`}>
           {ticket.status}
         </span>
-        <span
-          style={{
-            padding: "0.25rem 0.5rem",
-            background: "#eee",
-            borderRadius: "4px",
-          }}
-        >
+        <span className={`badge ${PRIORITY_BADGE_CLASS[ticket.priority]}`}>
           {ticket.priority}
         </span>
       </div>
 
-      <p style={{ whiteSpace: "pre-wrap" }}>{ticket.description}</p>
-      <p style={{ color: "#999", fontSize: "0.8rem" }}>
+      <p className="whitespace-pre-wrap text-slate-700">
+        {ticket.description}
+      </p>
+      <p className="mt-2 text-xs text-slate-500">
         Created: {new Date(ticket.created_at).toLocaleString()}
       </p>
 
-      <hr style={{ margin: "2rem 0" }} />
+      <hr className="my-8 border-slate-200" />
 
-      <h3>Comments ({comments.length})</h3>
+      <h3 className="mb-3 text-lg font-semibold text-slate-900">
+        Comments ({comments.length})
+      </h3>
 
       {comments.map((comment) => (
         <div
           key={comment.id}
-          style={{
-            padding: "0.75rem",
-            background: "#f9f9f9",
-            borderRadius: "4px",
-            marginBottom: "0.5rem",
-          }}
+          className="mb-2 rounded-lg bg-slate-50 p-3 ring-1 ring-slate-200"
         >
-          <p>{comment.body}</p>
-          <small style={{ color: "#999" }}>
+          <p className="text-slate-700">{comment.body}</p>
+          <small className="text-xs text-slate-500">
             User #{comment.author_id} ·{" "}
             {new Date(comment.created_at).toLocaleString()}
           </small>
@@ -146,48 +122,21 @@ export default function TicketDetail() {
       ))}
 
       {commentError && (
-        <div
-          style={{
-            background: "#fdecea",
-            color: "#e74c3c",
-            padding: "0.5rem",
-            borderRadius: "4px",
-            marginTop: "1rem",
-          }}
-        >
-          {commentError}
-        </div>
+        <div className="alert alert-error mt-4">{commentError}</div>
       )}
 
-      <form onSubmit={handleAddComment} style={{ marginTop: "1.5rem" }}>
+      <form onSubmit={handleAddComment} className="mt-6">
         <textarea
+          className="input mb-2"
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Add a comment..."
           rows={3}
-          style={{
-            width: "100%",
-            padding: "0.5rem",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            marginBottom: "0.5rem",
-          }}
         />
         <button
           type="submit"
           disabled={submittingComment || !newComment.trim()}
-          style={{
-            padding: "0.5rem 1rem",
-            background:
-              submittingComment || !newComment.trim() ? "#85c1e9" : "#3498db",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor:
-              submittingComment || !newComment.trim()
-                ? "not-allowed"
-                : "pointer",
-          }}
+          className="btn btn-primary"
         >
           {submittingComment ? "Adding..." : "Add Comment"}
         </button>

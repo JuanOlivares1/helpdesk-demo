@@ -35,71 +35,39 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      style={{
-        maxWidth: "500px",
-        margin: "0 auto 1rem",
-        padding: "1rem",
-        border: "1px solid #ddd",
-        borderRadius: "8px",
-      }}
+      className="mx-auto mb-4 w-full max-w-lg rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
     >
-      <h3 style={{ marginBottom: "0.5rem" }}>New Ticket</h3>
+      <h3 className="mb-3 text-lg font-semibold text-slate-900">New Ticket</h3>
 
-      {error && (
-        <div
-          style={{
-            background: "#fdecea",
-            color: "#e74c3c",
-            padding: "0.5rem",
-            borderRadius: "4px",
-            marginBottom: "1rem",
-          }}
-        >
-          {error}
-        </div>
-      )}
+      {error && <div className="alert alert-error">{error}</div>}
 
-      <div style={{ marginBottom: "0.5rem" }}>
+      <div className="mb-2">
         <input
+          className="input"
           type="text"
           placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          style={{
-            width: "100%",
-            padding: "0.5rem",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
         />
       </div>
 
-      <div style={{ marginBottom: "0.5rem" }}>
+      <div className="mb-2">
         <textarea
+          className="input"
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
           rows={3}
-          style={{
-            width: "100%",
-            padding: "0.5rem",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
         />
       </div>
 
-      <div style={{ marginBottom: "0.5rem" }}>
+      <div className="mb-3">
         <select
+          className="input w-auto"
           value={priority}
           onChange={(e) => setPriority(e.target.value as TicketPriority)}
-          style={{
-            padding: "0.5rem",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-          }}
         >
           {PRIORITY_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -109,18 +77,7 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
         </select>
       </div>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        style={{
-          padding: "0.5rem 1rem",
-          background: submitting ? "#85c1e9" : "#3498db",
-          color: "white",
-          border: "none",
-          borderRadius: "4px",
-          cursor: submitting ? "not-allowed" : "pointer",
-        }}
-      >
+      <button type="submit" disabled={submitting} className="btn btn-primary">
         {submitting ? "Creating..." : "Create Ticket"}
       </button>
     </form>

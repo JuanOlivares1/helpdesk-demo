@@ -2,28 +2,14 @@ import { Link } from "react-router-dom";
 
 export default function NotFound() {
   return (
-    <div
-      style={{
-        maxWidth: "500px",
-        margin: "3rem auto",
-        padding: "1.5rem",
-        textAlign: "center",
-      }}
-    >
-      <h2 style={{ marginBottom: "0.5rem" }}>Page not found</h2>
-      <p style={{ color: "#666", marginBottom: "1.5rem" }}>
+    <div className="mx-auto mt-16 max-w-md px-4 text-center">
+      <h2 className="mb-2 text-2xl font-semibold text-slate-900">
+        Page not found
+      </h2>
+      <p className="mb-6 text-slate-600">
         The page you are looking for does not exist.
       </p>
-      <Link
-        to="/"
-        style={{
-          padding: "0.75rem 1rem",
-          background: "#3498db",
-          color: "white",
-          borderRadius: "4px",
-          textDecoration: "none",
-        }}
-      >
+      <Link to="/" className="btn btn-primary">
         Back to tickets
       </Link>
     </div>

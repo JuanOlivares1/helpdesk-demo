@@ -9,11 +9,7 @@ import TicketDetail from "./components/TicketDetail";
 import NotFound from "./components/NotFound";
 
 function LoadingScreen() {
-  return (
-    <div style={{ textAlign: "center", marginTop: "2rem", color: "#666" }}>
-      Loading...
-    </div>
-  );
+  return <div className="mt-8 text-center text-slate-500">Loading...</div>;
 }
 
 function PrivateRoute({ children }: { children: ReactNode }) {
