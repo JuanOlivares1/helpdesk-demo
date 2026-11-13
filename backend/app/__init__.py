@@ -4,6 +4,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from app.config import get_config
+from app.errors import register_error_handlers
 from app.extensions import db, jwt, migrate
 from app.logging import configure_logging, register_request_logging
 
@@ -32,6 +33,7 @@ def create_app(test_config: dict | None = None) -> Flask:
         app.config.update(test_config)
 
     configure_logging(app)
+    register_error_handlers(app)
 
     db.init_app(app)
     jwt.init_app(app)
