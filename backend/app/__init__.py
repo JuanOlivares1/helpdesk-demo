@@ -41,8 +41,8 @@ def create_app(test_config: dict | None = None) -> Flask:
 
     register_error_handlers(app)
 
-    from app.routes.auth import auth_bp
-    from app.routes.tickets import tickets_bp
+    from app.api.auth.routes import auth_bp
+    from app.api.tickets.routes import tickets_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(tickets_bp, url_prefix="/api/tickets")

@@ -5,6 +5,7 @@ from marshmallow import ValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.exceptions import HTTPException
 
+from app.exceptions import ApiError
 from app.extensions import jwt
 
 
@@ -47,6 +48,10 @@ def register_error_handlers(app: Flask) -> None:
     @app.errorhandler(ValidationError)
     def handle_validation_error(error: ValidationError) -> tuple[Response, int]:
         return jsonify({"errors": error.messages}), 422
+
+    @app.errorhandler(ApiError)
+    def handle_api_error(error: ApiError) -> tuple[Response, int]:
+        return jsonify({"error": error.message}), error.status_code
 
     @app.errorhandler(HTTPException)
     def handle_http_error(error: HTTPException) -> tuple[Response, int]:
