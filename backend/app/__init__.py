@@ -33,12 +33,13 @@ def create_app(test_config: dict | None = None) -> Flask:
         app.config.update(test_config)
 
     configure_logging(app)
-    register_error_handlers(app)
 
     db.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
     CORS(app, origins=_parse_cors_origins(app.config["CORS_ORIGINS"]))
+
+    register_error_handlers(app)
 
     from app.routes.auth import auth_bp
     from app.routes.tickets import tickets_bp
