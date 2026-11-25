@@ -1,25 +1,42 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getApiError, ticketApi } from "../api";
 import { useAuth } from "../auth/useAuth";
+import { formatDate } from "../lib/format";
 import {
   PRIORITY_BADGE_CLASS,
+  PRIORITY_LABELS,
   STATUS_BADGE_CLASS,
+  STATUS_LABELS,
   STATUS_OPTIONS,
 } from "../ticket-meta";
 import type { Ticket, TicketStatus } from "../types";
-import TicketForm from "./TicketForm";
+import Alert from "./Alert";
+import NewTicketDialog from "./NewTicketDialog";
+import Pagination from "./Pagination";
+
+const PAGE_SIZE = 10;
+
+function isStatus(value: string | null): value is TicketStatus {
+  return STATUS_OPTIONS.some((option) => option.value === value);
+}
 
 export default function TicketList() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<TicketStatus | "">("");
-  const [showForm, setShowForm] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
   const [refreshKey, setRefreshKey] = useState(0);
-  const navigate = useNavigate();
   const { user } = useAuth();
+
+  const rawStatus = searchParams.get("status");
+  const statusFilter = isStatus(rawStatus) ? rawStatus : "";
+  const rawPage = Number(searchParams.get("page") ?? "1");
+  const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
   const canCreate = user?.role === "admin" || user?.role === "client";
+  const showForm = canCreate && searchParams.get("new") === "1";
 
   useEffect(() => {
     let cancelled = false;
@@ -30,12 +47,14 @@ export default function TicketList() {
 
       try {
         const response = await ticketApi.list(
-          1,
-          50,
-          statusFilter || undefined
+          page,
+          PAGE_SIZE,
+          statusFilter || undefined,
         );
         if (!cancelled) {
           setTickets(response.data.tickets);
+          setTotal(response.data.total);
+          setPages(response.data.pages);
         }
       } catch (err) {
         if (!cancelled) {
@@ -53,110 +72,171 @@ export default function TicketList() {
     return () => {
       cancelled = true;
     };
-  }, [statusFilter, refreshKey]);
+  }, [page, statusFilter, refreshKey]);
+
+  const hrefFor = (status: string, targetPage: number) => {
+    const params = new URLSearchParams();
+    if (status) params.set("status", status);
+    if (targetPage > 1) params.set("page", String(targetPage));
+    const query = params.toString();
+    return query ? `/?${query}` : "/";
+  };
+
+  const openForm = () => {
+    const next = new URLSearchParams(searchParams);
+    next.set("new", "1");
+    setSearchParams(next);
+  };
+
+  const closeForm = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("new");
+    setSearchParams(next, { replace: true });
+  };
 
   const handleCreated = () => {
-    setShowForm(false);
+    closeForm();
     setRefreshKey((key) => key + 1);
   };
 
-  return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-2xl font-semibold text-slate-900">Tickets</h2>
-        <div className="flex items-center gap-2">
-          <select
-            className="input w-auto"
-            value={statusFilter}
-            onChange={(e) =>
-              setStatusFilter(e.target.value as TicketStatus | "")
-            }
-          >
-            <option value="">All Status</option>
-            {STATUS_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+  const filterOptions = [
+    { value: "", label: "All" },
+    ...STATUS_OPTIONS,
+  ];
 
-          {canCreate && (
-            <button
-              onClick={() => setShowForm((visible) => !visible)}
-              className="btn btn-primary"
+  return (
+    <main id="main" className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold text-ink">Tickets</h1>
+          <p className="mt-1 text-sm text-ink/60">
+            {total} {total === 1 ? "request" : "requests"} in view
+          </p>
+        </div>
+        {canCreate && (
+          <button type="button" onClick={openForm} className="btn btn-primary">
+            New ticket
+          </button>
+        )}
+      </header>
+
+      <nav
+        aria-label="Filter tickets by status"
+        className="mt-6 flex flex-wrap gap-2"
+      >
+        {filterOptions.map((option) => {
+          const active = statusFilter === option.value;
+          return (
+            <Link
+              key={option.value || "all"}
+              to={hrefFor(option.value, 1)}
+              aria-current={active ? "page" : undefined}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium focus-visible:ring-2 focus-visible:ring-signal ${
+                active
+                  ? "border-signal bg-signal text-white"
+                  : "border-line bg-white text-ink/65 hover:border-signal/40 hover:text-ink"
+              }`}
             >
-              {showForm ? "Cancel" : "New Ticket"}
+              {option.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {error && (
+        <Alert tone="error" className="mt-5">
+          {error}
+        </Alert>
+      )}
+
+      {loading ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="panel mt-5 px-6 py-14 text-center text-sm text-ink/60"
+        >
+          Loading tickets…
+        </div>
+      ) : tickets.length === 0 ? (
+        <div className="panel mt-5 flex flex-col items-center gap-3 px-6 py-14 text-center">
+          <p className="font-mono text-xs font-semibold text-ink/45">
+            No matches
+          </p>
+          <h2 className="text-lg font-semibold text-ink">
+            {statusFilter
+              ? `No ${STATUS_LABELS[statusFilter].toLowerCase()} tickets`
+              : "No tickets yet"}
+          </h2>
+          <p className="max-w-sm text-sm leading-relaxed text-ink/60">
+            {statusFilter
+              ? "Try another status to see more requests."
+              : "Create the first ticket to start tracking requests."}
+          </p>
+          {canCreate && !statusFilter && (
+            <button type="button" onClick={openForm} className="btn btn-secondary mt-2">
+              New ticket
             </button>
           )}
         </div>
-      </div>
-
-      {showForm && <TicketForm onSuccess={handleCreated} />}
-
-      {error && <div className="alert alert-error">{error}</div>}
-
-      {loading ? (
-        <p className="py-8 text-center text-slate-500">Loading tickets...</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="min-w-full divide-y divide-slate-200 text-sm">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  ID
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Title
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Priority
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Created
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
-              {tickets.map((ticket) => (
-                <tr
-                  key={ticket.id}
-                  onClick={() => navigate(`/ticket/${ticket.id}`)}
-                  className="cursor-pointer transition hover:bg-slate-50"
-                >
-                  <td className="px-4 py-3 text-slate-500">{ticket.id}</td>
-                  <td className="px-4 py-3 font-medium text-slate-900">
-                    {ticket.title}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`badge ${STATUS_BADGE_CLASS[ticket.status]}`}
-                    >
-                      {ticket.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`badge ${PRIORITY_BADGE_CLASS[ticket.priority]}`}
-                    >
-                      {ticket.priority}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-slate-500">
-                    {new Date(ticket.created_at).toLocaleDateString()}
-                  </td>
+        <section aria-label="Ticket list" className="panel mt-5 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="data-table">
+              <caption className="sr-only">Tickets in the current view</caption>
+              <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Title</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Priority</th>
+                  <th scope="col">Created</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {tickets.map((ticket) => (
+                  <tr key={ticket.id}>
+                    <td className="font-mono text-xs tabular-nums text-ink/50">
+                      {ticket.id}
+                    </td>
+                    <td className="min-w-0 max-w-xs">
+                      <Link
+                        to={`/ticket/${ticket.id}`}
+                        className="block truncate rounded-sm font-medium text-ink hover:text-signal focus-visible:ring-2 focus-visible:ring-signal"
+                      >
+                        {ticket.title}
+                      </Link>
+                    </td>
+                    <td className="whitespace-nowrap">
+                      <span
+                        className={`badge ${STATUS_BADGE_CLASS[ticket.status]}`}
+                      >
+                        {STATUS_LABELS[ticket.status]}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap">
+                      <span
+                        className={`badge ${PRIORITY_BADGE_CLASS[ticket.priority]}`}
+                      >
+                        {PRIORITY_LABELS[ticket.priority]}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap font-mono text-xs tabular-nums text-ink/60">
+                      {formatDate(ticket.created_at)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Pagination page={page} pages={pages} status={statusFilter} />
+        </section>
       )}
 
-      {!loading && tickets.length === 0 && (
-        <p className="py-8 text-center text-slate-500">No tickets found</p>
-      )}
-    </div>
+      <NewTicketDialog
+        open={showForm}
+        onClose={closeForm}
+        onSuccess={handleCreated}
+      />
+    </main>
   );
 }

@@ -1,65 +1,160 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-ink: #16232b;
+  --color-paper: #f6f8f7;
+  --color-line: #d7e0dd;
+  --color-signal: #0b6e62;
+  --color-warning: #b54708;
+  --color-critical: #b42318;
 }
 
 @layer base {
+  html {
+    color-scheme: light;
+    scroll-behavior: smooth;
+  }
+
   body {
-    min-height: 100vh;
-    background-color: var(--color-slate-50);
-    color: var(--color-slate-800);
+    min-height: 100dvh;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  button,
+  a {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-signal);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-signal) 22%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
 }
 
 @layer components {
-  .card {
-    @apply mx-auto w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm;
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white;
+  }
+
+  .panel {
+    @apply rounded-lg border border-line bg-white;
   }
 
   .label {
-    @apply mb-1 block text-sm font-medium text-slate-700;
+    @apply mb-1.5 block text-sm font-medium text-ink;
   }
 
   .input {
-    @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200;
+    @apply w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink/45 focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/20 motion-safe:transition-colors motion-safe:duration-150;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 motion-safe:transition-colors motion-safe:duration-150;
   }
 
   .btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700;
-  }
-
-  .btn-success {
-    @apply bg-emerald-600 text-white hover:bg-emerald-700;
+    @apply bg-signal text-white hover:bg-signal/90 focus-visible:ring-signal;
   }
 
   .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700;
+    @apply bg-critical text-white hover:bg-critical/90 focus-visible:ring-critical;
   }
 
   .btn-secondary {
-    @apply bg-slate-100 text-slate-700 hover:bg-slate-200;
+    @apply border border-line bg-white text-ink hover:bg-paper focus-visible:ring-signal;
+  }
+
+  .btn-ghost {
+    @apply text-ink/70 hover:bg-ink/5 hover:text-ink focus-visible:ring-signal;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
   }
 
   .alert {
-    @apply mb-4 rounded-md px-4 py-3 text-sm;
+    @apply flex items-start gap-2 rounded-md px-3 py-2.5 text-sm ring-1 ring-inset;
   }
 
   .alert-error {
-    @apply bg-red-50 text-red-700 ring-1 ring-red-200;
+    @apply bg-critical/5 text-critical ring-critical/20;
   }
 
   .alert-success {
-    @apply bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200;
+    @apply bg-signal/5 text-signal ring-signal/20;
+  }
+
+  .alert-info {
+    @apply bg-paper text-ink/80 ring-line;
   }
 
   .badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset;
+  }
+
+  .data-table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .data-table th {
+    @apply border-b border-line px-4 py-3 text-left text-xs font-semibold text-ink/60;
+  }
+
+  .data-table td {
+    @apply border-b border-line/70 px-4 py-3 align-middle;
+  }
+
+  .data-table tbody tr {
+    @apply motion-safe:transition-colors motion-safe:duration-150 hover:bg-paper focus-within:bg-paper;
+  }
+
+  .auth-shell {
+    @apply grid min-h-dvh lg:grid-cols-[minmax(280px,38%)_1fr];
+  }
+
+  .auth-aside {
+    @apply hidden flex-col justify-between bg-signal p-10 text-white lg:flex;
+  }
+
+  .auth-main {
+    @apply flex items-center justify-center px-4 py-10 sm:px-8;
+  }
+
+  .auth-card {
+    @apply w-full max-w-md rounded-xl border border-line bg-white p-6 shadow-sm;
+  }
+
+  .dialog {
+    @apply max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-xl border border-line bg-white p-6 shadow-xl;
+    overscroll-behavior: contain;
+  }
+
+  .dialog::backdrop {
+    background-color: rgb(22 35 43 / 0.45);
+    overscroll-behavior: contain;
   }
 }

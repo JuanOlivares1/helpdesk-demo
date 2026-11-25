@@ -1,83 +1,153 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authApi, getApiError } from "../api";
+import { authApi, getApiError, getFieldErrors } from "../api";
+import Alert from "./Alert";
+import Field from "./Field";
 
 export default function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError("");
+    setFieldErrors({});
     setSubmitting(true);
 
     try {
       await authApi.register(email, password);
       navigate("/login", { replace: true, state: { registered: true } });
     } catch (err) {
-      setError(getApiError(err, "Registration failed"));
+      const errors = getFieldErrors(err);
+      setFieldErrors(errors);
+      setError(
+        Object.keys(errors).length > 0
+          ? "Check the highlighted fields."
+          : getApiError(err, "Registration failed"),
+      );
+      requestAnimationFrame(() => {
+        formRef.current
+          ?.querySelector<HTMLElement>('[aria-invalid="true"]')
+          ?.focus();
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="card mt-8 max-w-sm">
-      <h2 className="mb-4 text-xl font-semibold text-slate-900">Register</h2>
+    <div className="auth-shell">
+      <aside aria-label="About HelpDesk" className="auth-aside">
+        <div>
+          <p className="font-mono text-xs text-white/70">HelpDesk / Support desk</p>
+          <p className="mt-8 max-w-sm text-3xl font-semibold leading-tight text-balance">
+            One place for every request.
+          </p>
+          <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/75">
+            Create a ticket, follow its progress, and keep the conversation in
+            context.
+          </p>
+        </div>
+        <ul className="space-y-3 text-sm text-white/80">
+          <li className="flex items-center gap-3">
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-white/80" />
+            Clear status at every step
+          </li>
+          <li className="flex items-center gap-3">
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-white/80" />
+            Comments tied to the right ticket
+          </li>
+        </ul>
+        <p className="font-mono text-xs text-white/50">
+          © {new Date().getFullYear()} HelpDesk
+        </p>
+      </aside>
 
-      {error && <div className="alert alert-error">{error}</div>}
+      <main id="main" className="auth-main">
+        <form ref={formRef} onSubmit={handleSubmit} className="auth-card">
+          <h1 className="text-2xl font-semibold text-ink">Create account</h1>
+          <p className="mt-1 text-sm text-ink/60">
+            Start by telling us how to reach you.
+          </p>
 
-      <div className="mb-4">
-        <label className="label" htmlFor="register-email">
-          Email
-        </label>
-        <input
-          id="register-email"
-          className="input"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-          required
-        />
-      </div>
+          {error && (
+            <Alert tone="error" className="mt-5">
+              {error}
+            </Alert>
+          )}
 
-      <div className="mb-4">
-        <label className="label" htmlFor="register-password">
-          Password
-        </label>
-        <input
-          id="register-password"
-          className="input"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="new-password"
-          minLength={8}
-          required
-        />
-        <small className="mt-1 block text-xs text-slate-500">
-          At least 8 characters.
-        </small>
-      </div>
+          <div className="mt-6 space-y-4">
+            <Field label="Email" error={fieldErrors.email}>
+              {({ id, invalid, describedBy }) => (
+                <input
+                  id={id}
+                  name="email"
+                  className="input"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  autoComplete="email"
+                  spellCheck={false}
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                  required
+                />
+              )}
+            </Field>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="btn btn-success w-full"
-      >
-        {submitting ? "Creating account..." : "Register"}
-      </button>
+            <Field
+              label="Password"
+              hint="Use at least 8 characters."
+              error={fieldErrors.password}
+            >
+              {({ id, invalid, describedBy }) => (
+                <input
+                  id={id}
+                  name="password"
+                  className="input"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  autoComplete="new-password"
+                  minLength={8}
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                  required
+                />
+              )}
+            </Field>
+          </div>
 
-      <p className="mt-4 text-center text-sm text-slate-600">
-        Already have an account?{" "}
-        <Link className="font-medium text-blue-600 hover:underline" to="/login">
-          Login
-        </Link>
-      </p>
-    </form>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="btn btn-primary mt-6 w-full"
+          >
+            {submitting && (
+              <span
+                aria-hidden="true"
+                className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:hidden"
+              />
+            )}
+            {submitting ? "Creating account…" : "Create account"}
+          </button>
+
+          <p className="mt-5 text-center text-sm text-ink/60">
+            Already registered?{" "}
+            <Link
+              to="/login"
+              className="rounded-sm font-medium text-signal hover:underline focus-visible:ring-2 focus-visible:ring-signal"
+            >
+              Sign in
+            </Link>
+          </p>
+        </form>
+      </main>
+    </div>
   );
 }

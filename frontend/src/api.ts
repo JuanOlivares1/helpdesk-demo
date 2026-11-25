@@ -41,7 +41,7 @@ api.interceptors.response.use(
     ) {
       localStorage.removeItem("token");
       if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+        window.location.replace("/login");
       }
     }
 
@@ -86,6 +86,20 @@ export function getApiError(error: unknown, fallback: string): string {
   }
 
   return fallback;
+}
+
+export function getFieldErrors(error: unknown): Record<string, string> {
+  if (!axios.isAxiosError<ApiErrorBody>(error)) return {};
+
+  const errors = error.response?.data?.errors;
+  if (!errors) return {};
+
+  return Object.fromEntries(
+    Object.entries(errors).map(([field, value]) => [
+      field,
+      Array.isArray(value) ? value.join(", ") : String(value),
+    ]),
+  );
 }
 
 interface AuthResponse {

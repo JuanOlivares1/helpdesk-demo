@@ -1,39 +1,59 @@
-# AGENTS.md
+# AGENTS.md — HelpDesk
 
-Helpdesk multiusuario con backend Flask + SQLAlchemy/JWT (`backend/`) y frontend React 19 + TypeScript + Vite + Tailwind CSS v4 (`frontend/`). No hay build unificado en la raíz: cada subproyecto se ejecuta por separado.
+Multi-user ticket helpdesk for clients and support teams. The backend is Flask + SQLAlchemy/JWT and the frontend is a React SPA; each subproject runs separately from the repository root.
+
+## Stack y estructura
+
+- Backend: Flask 3.1, Flask-SQLAlchemy 3.1, Flask-JWT-Extended 4.7, Flask-CORS 5.0, Flask-Migrate 4.1, Marshmallow 4.4, Gunicorn 23, psycopg 3.3. Python 3.12; the virtualenv is included in `backend/venv/`.
+- Frontend: React 19.3, TypeScript 6, Vite 8, React Router 7.18, Axios 1.21, Tailwind CSS 4.3 with `@tailwindcss/vite`. Node 20+ (tested with 22).
+- `backend/app/__init__.py`: `create_app` factory; selects config, initializes logging/extensions/error handlers, registers `auth_bp` at `/api/auth` and `tickets_bp` at `/api/tickets`, and exposes `/health` without auth.
+- `backend/app/config.py`: `BaseConfig`, `DevelopmentConfig`, `TestingConfig`, `ProductionConfig`; reads `FLASK_ENV`/`APP_ENV`, `DATABASE_URL`, `SECRET_KEY`, `JWT_SECRET_KEY`, `LOG_LEVEL`, `LOG_JSON`, `CORS_ORIGINS`.
+- `backend/app/logging.py`, `errors.py`, `exceptions.py`: JSON or readable logs with `X-Request-ID`; global handlers for 422 validation, 400/403/404/409 API errors, 401 JWT errors and 500 SQLAlchemy errors.
+- `backend/app/api/auth/`: `routes.py`, `schemas.py`, `service.py`, `decorators.py` (`role_required`). `backend/app/api/tickets/`: `routes.py`, `schemas.py`, `service.py`; permissions and pagination live in the service.
+- `backend/app/api/dependencies.py`: `current_user()` from the JWT. `backend/app/models.py`: `User`, `Ticket`, `Comment`; extensions in `extensions.py`, domain constants in `constants.py`.
+- `backend/migrations/`: Flask-Migrate; initial revision `ea26a6ef442b`. `backend/instance/helpdesk.db` is the ignored development database.
+- `frontend/src/api.ts`: typed axios client, base `VITE_API_URL` (default `http://localhost:5000/api`), token in `localStorage` as `token`, 401 redirect except on login/register.
+- `frontend/src/auth/`: `AuthProvider` validates the token with `/auth/me`; `useAuth` exposes `user`, `token`, `loading`, `login`, `logout`, `refreshUser`.
+- `frontend/src/App.tsx`: `/login`, `/register`, `/`, `/ticket/:id` and a 404 route; `PrivateRoute`/`PublicOnlyRoute` wait for `loading`.
+- `frontend/src/types.ts`: API types. `frontend/src/ticket-meta.ts`: status/priority labels and badge classes. `frontend/src/index.css`: Tailwind v4 semantic component classes and theme tokens.
+- `docker-compose.yml`: PostgreSQL 16 plus backend with Gunicorn; runs `flask db upgrade` before starting. The frontend runs separately with `npm run dev`.
 
 ## Comandos
 
-Backend (venv incluido en `backend/venv/`):
+Setup (all `.env` files are gitignored; never commit them):
 
 ```bash
-source backend/venv/bin/activate      # desde la raíz
-pytest                                # pytest.ini define pythonpath=backend; 36 tests pasan
-pytest backend/tests/test_auth.py::test_register_and_login   # un solo test
-cd backend && flask --app app run --debug --port 5000
-cd backend && gunicorn --bind 0.0.0.0:5000 wsgi:app          # producción (wsgi.py)
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 ```
 
-Migraciones (Flask-Migrate configurado en `backend/migrations/`; revisión inicial `ea26a6ef442b`):
+Backend (`pytest.ini` sets `pythonpath=backend`; 36 tests pass today):
+
+```bash
+source backend/venv/bin/activate
+pytest
+pytest backend/tests/test_auth.py::test_register_and_login
+cd backend && flask --app app run --debug --port 5000
+cd backend && gunicorn --bind 0.0.0.0:5000 wsgi:app
+```
+
+Migrations:
 
 ```bash
 cd backend
 flask --app app db upgrade
-flask --app app db migrate -m "descripción del cambio"
+flask --app app db migrate -m "describe the change"
 flask --app app db downgrade
 ```
 
-`DevelopmentConfig` y `TestingConfig` tienen `CREATE_TABLES=True` y ejecutan `db.create_all()` al crear la app. `ProductionConfig` (`APP_ENV=production`) no crea tablas: requiere `flask db upgrade`. Si una base de desarrollo ya tenía tablas creadas por `create_all()`, usa `flask db stamp head` antes de aplicar migraciones. No asumas que los cambios de modelo se migran solos.
-
-Frontend (desde `frontend/`):
+Frontend (no test runner; verification is lint + build):
 
 ```bash
+cd frontend
 npm run dev
 npm run lint
-npm run build     # equivale a: tsc -b && vite build
+npm run build
 ```
-
-No hay runner de tests en el frontend. Verificación completa: `npm run lint && npm run build`.
 
 Docker:
 
@@ -42,33 +62,52 @@ cp .env.example .env
 docker compose up --build
 ```
 
-`docker-compose.yml` levanta PostgreSQL 16 y el backend con Gunicorn; el comando aplica `flask db upgrade` antes de arrancar. El frontend se ejecuta aparte con `npm run dev`.
+## Convenciones
 
-## Arquitectura y wiring
+- Write professional, portfolio-quality code: small functions, typed boundaries, explicit errors, no dead code.
+- The application is fully in English: UI copy, identifiers, file names, code comments and docstrings. Legacy Spanish comments are translated only in files we touch; do not start a global rewrite without asking.
+- Keep the UI clean, responsive and keyboard accessible; every new screen must work well on mobile.
+- Comments and docstrings explain intent, not the obvious code. The Spanish headings in this document follow the template; they do not change the English rule for the application.
+- UI and error copy uses active voice and sentence case; loading states end with `…`.
+- Use Tailwind v4 tokens and semantic classes from `frontend/src/index.css`; avoid inline styles unless the change is deliberately about styling.
 
-- `backend/app/__init__.py`: app factory `create_app`; elige configuración, inicializa logging, extensiones, manejadores de error y registra `auth_bp` en `/api/auth` y `tickets_bp` en `/api/tickets`.
-- `backend/app/config.py`: `BaseConfig`, `DevelopmentConfig`, `TestingConfig`, `ProductionConfig` y `get_config`; lee `FLASK_ENV`/`APP_ENV`, `DATABASE_URL`, `SECRET_KEY`, `JWT_SECRET_KEY`, `LOG_LEVEL`, `LOG_JSON` y `CORS_ORIGINS`.
-- `backend/app/logging.py`: logging JSON o legible con `request_id` y header `X-Request-ID`.
-- `backend/app/errors.py`: handlers globales para `ValidationError` (422), `ApiError` (400/403/404/409), `HTTPException`, `SQLAlchemyError` y errores JWT (401).
-- `backend/app/exceptions.py`: `ApiError`, `BadRequestError`, `PermissionDeniedError`, `NotFoundError`, `ConflictError`.
-- `backend/app/api/auth/`: `routes.py`, `schemas.py` (Marshmallow), `service.py` y `decorators.py` (`role_required`).
-- `backend/app/api/tickets/`: `routes.py`, `schemas.py` y `service.py`; permisos y paginación viven en el servicio.
-- `backend/app/api/dependencies.py`: `current_user()` a partir del JWT.
-- `backend/app/models.py`: `User`, `Ticket` y `Comment`; extensiones en `extensions.py`; constantes de dominio en `constants.py`.
-- Roles: `admin`, `agent`, `client`. Los `client` solo ven/comentan sus propios tickets (`user_id`) y solo pueden cambiar el estado a `resolved`/`closed`. `admin` y `agent` ven todos los tickets y pueden cambiar estado, prioridad y asignar a otro `admin`/`agent`. Crear tickets está permitido a `admin` y `client`, no a `agent`. No existe columna de tenant/organización: el aislamiento actual es por `user_id`.
-- El JWT guarda la identidad como string (`str(user.id)`); al consultar usuarios hay que convertirla con `int()`.
-- El registro (`POST /api/auth/register`) **ignora `role`** y fuerza `client`; los schemas usan `unknown=EXCLUDE`. No existe endpoint para crear/promover admins o agents.
-- Validación con Marshmallow: los errores devuelven `422 {"errors": {...}}`; el resto de errores usan `{"error": "..."}`.
-- Frontend: `src/api.ts` es el cliente axios tipado con base `VITE_API_URL` (default `http://localhost:5000/api`). El token vive en `localStorage` como `token`; axios lo inyecta y redirige a `/login` ante 401 (excepto login/registro). `getApiError` formatea también errores 422.
-- `src/auth/`: `AuthProvider` valida el token con `/auth/me`, expone `user`, `token`, `loading`, `login`, `logout` y `refreshUser`; `useAuth` es el hook de acceso.
-- Rutas en `src/App.tsx`: `/login`, `/register`, `/`, `/ticket/:id` y comodín 404. `PrivateRoute` y `PublicOnlyRoute` esperan a que `loading` termine.
-- `src/types.ts` centraliza los tipos de la API; `src/ticket-meta.ts` las opciones y clases Tailwind de estado/prioridad.
+## Reglas de dominio / trampas conocidas
 
-## Setup y convenciones
+- PostgreSQL is used in Docker/production; SQLite is used for tests (in memory) and for the ignored development database `backend/instance/helpdesk.db`.
+- Roles: `admin`, `agent`, `client`. Clients see and comment only their own tickets (`user_id`) and may only change status to `resolved`/`closed`. Admins and agents see all tickets, can change status/priority and assign to another admin/agent. Creating tickets is allowed for admin and client, not agent.
+- There is no tenant/organization column: isolation is based on `user_id` only.
+- The JWT stores identity as `str(user.id)`; convert it with `int()` when querying users.
+- Public registration ignores `role` and forces `client`; schemas use `unknown=EXCLUDE`. There is no endpoint to create/promote admins or agents yet (see `MEMORY.md`).
+- Validation errors return `422 {"errors": {...}}`; every other error uses `{"error": "..."}`.
+- `DevelopmentConfig` and `TestingConfig` set `CREATE_TABLES=True` and call `db.create_all()`. `ProductionConfig` (`APP_ENV=production`) does not: run `flask db upgrade`. If a development database predates migrations, run `flask db stamp head` first. Model changes do not migrate themselves.
+- There are no CI workflows or pre-commit hooks; run checks manually.
 
-- Copia `backend/.env.example` a `backend/.env` y `frontend/.env.example` a `frontend/.env`. Para Docker, copia `.env.example` de la raíz a `.env`. Todos los `.env` están gitignoreados: no los commitees.
-- La BD de desarrollo es `backend/instance/helpdesk.db` (ignorada). Los tests usan SQLite en memoria y crean sus propios usuarios. Docker usa PostgreSQL 16 con `psycopg`.
-- El frontend usa Tailwind CSS v4 con clases semánticas definidas en `src/index.css`; no añadas estilos inline salvo que sea un cambio deliberado. El plugin `@tailwindcss/vite` está configurado en `vite.config.ts`.
-- UI y mensajes de error en inglés; comentarios/docstrings del código en español. Mantén cada convención donde corresponde.
-- No hay workflows de CI ni hooks de pre-commit: ejecuta lint/tests manualmente antes de cerrar un cambio.
-- No hay runner de tests en el frontend; verifica con `npm run lint && npm run build`.
+## Forma de trabajar
+
+- Do only what is asked; do not add features on your own without asking first.
+- Spec-driven development: define the task, execute it, verify it, then move to the next one. One task at a time.
+- Read `MEMORY.md` at the start of a session and update it when a task finishes.
+- At the end, summarize what changed and list any decision that needs review.
+
+## Memoria
+
+- At the start, read `MEMORY.md` for project state and decisions already taken.
+- After each task, update it: current state, important decisions with their reason, and mistakes to avoid.
+- Keep it short (about 50 lines maximum): summarize or remove what no longer helps.
+- If something becomes a permanent rule, propose moving it to `AGENTS.md` instead of leaving it in memory.
+- Never store sensitive data (keys, tokens, personal data) in it.
+
+## Límites
+
+- ✅ Siempre: explain planned changes and suggestions one task at a time; update `MEMORY.md` after each task; run the verification commands below before closing a task.
+- ⚠ Pregunta antes: new dependencies, new files, data-format changes, architecture changes, global refactors, or backend work when the task is frontend-only.
+- 🚫 Nunca: commit `.env` files, secrets or personal data; assume model changes are migrated automatically; add Spanish text or comments to new code; modify files outside the agreed task.
+
+## Verificación
+
+Cómo comprobar que un cambio funciona antes de darlo por terminado:
+
+- Backend: `pytest`; when models change, also apply `cd backend && flask --app app db upgrade` against a disposable database.
+- Frontend: `cd frontend && npm run lint && npm run build` (there is no frontend test runner).
+- Full stack: start the API and `npm run dev`, then check `/health`, login, ticket list/detail, a mobile viewport and keyboard focus order.
+- Manual only: no CI workflows or pre-commit hooks exist yet.

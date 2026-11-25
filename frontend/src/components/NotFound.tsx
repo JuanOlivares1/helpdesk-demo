@@ -2,16 +2,20 @@ import { Link } from "react-router-dom";
 
 export default function NotFound() {
   return (
-    <div className="mx-auto mt-16 max-w-md px-4 text-center">
-      <h2 className="mb-2 text-2xl font-semibold text-slate-900">
-        Page not found
-      </h2>
-      <p className="mb-6 text-slate-600">
-        The page you are looking for does not exist.
-      </p>
-      <Link to="/" className="btn btn-primary">
-        Back to tickets
-      </Link>
-    </div>
+    <main id="main" className="auth-main">
+      <div className="max-w-md text-center">
+        <p className="font-mono text-xs font-semibold text-signal">404</p>
+        <h1 className="mt-3 text-3xl font-semibold text-ink">
+          That page isn’t on the queue.
+        </h1>
+        <p className="mt-3 text-sm leading-relaxed text-ink/60">
+          The address may be outdated, or the page may have moved. Head back to
+          your tickets to keep working.
+        </p>
+        <Link to="/" className="btn btn-primary mt-6">
+          Back to tickets
+        </Link>
+      </div>
+    </main>
   );
 }

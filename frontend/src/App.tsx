@@ -9,7 +9,13 @@ import TicketDetail from "./components/TicketDetail";
 import NotFound from "./components/NotFound";
 
 function LoadingScreen() {
-  return <div className="mt-8 text-center text-slate-500">Loading...</div>;
+  return (
+    <main id="main" className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+      <p role="status" aria-live="polite" className="text-sm text-ink/60">
+        Loading…
+      </p>
+    </main>
+  );
 }
 
 function PrivateRoute({ children }: { children: ReactNode }) {
@@ -35,6 +41,9 @@ function PublicOnlyRoute({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <a href="#main" className="skip-link">
+        Skip to main content
+      </a>
       <Navbar />
       <Routes>
         <Route
