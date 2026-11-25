@@ -77,6 +77,7 @@ En desarrollo y tests `CREATE_TABLES=True` ejecuta `db.create_all()`. En producc
 | POST | `/api/auth/register` | Registro (siempre rol `client`) |
 | POST | `/api/auth/login` | Login y obtención del JWT |
 | GET | `/api/auth/me` | Usuario autenticado |
+| GET | `/api/users/assignees` | Usuarios asignables (admin/agent) |
 | GET/POST | `/api/tickets/` | Listado paginado / creación |
 | GET/PATCH | `/api/tickets/<id>` | Detalle / actualización |
 | GET/POST | `/api/tickets/<id>/comments` | Listado / creación de comentarios |

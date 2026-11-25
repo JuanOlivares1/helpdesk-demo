@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getApiError, ticketApi } from "../api";
+import { getApiError, ticketApi, usersApi } from "../api";
 import { useAuth } from "../auth/useAuth";
 import { formatDateTime } from "../lib/format";
 import {
@@ -12,6 +12,7 @@ import {
   STATUS_OPTIONS,
 } from "../ticket-meta";
 import type {
+  Assignee,
   Comment,
   Ticket,
   TicketPriority,
@@ -25,6 +26,7 @@ import StatusRail from "./StatusRail";
 interface Draft {
   status: TicketStatus;
   priority: TicketPriority;
+  assigneeId: number | null;
 }
 
 export default function TicketDetail() {
@@ -34,13 +36,16 @@ export default function TicketDetail() {
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [assignees, setAssignees] = useState<Assignee[]>([]);
   const [draft, setDraft] = useState<Draft>({
     status: "open",
     priority: "medium",
+    assigneeId: null,
   });
   const [newComment, setNewComment] = useState("");
   const [error, setError] = useState("");
   const [commentError, setCommentError] = useState("");
+  const [assigneeError, setAssigneeError] = useState("");
   const [updateError, setUpdateError] = useState("");
   const [updateSuccess, setUpdateSuccess] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
@@ -66,7 +71,11 @@ export default function TicketDetail() {
           const loaded = ticketResponse.data.ticket;
           setTicket(loaded);
           setComments(commentsResponse.data.comments);
-          setDraft({ status: loaded.status, priority: loaded.priority });
+          setDraft({
+            status: loaded.status,
+            priority: loaded.priority,
+            assigneeId: loaded.assignee_id,
+          });
           setError("");
         }
       } catch (err) {
@@ -82,6 +91,32 @@ export default function TicketDetail() {
       cancelled = true;
     };
   }, [ticketId, validId]);
+
+  useEffect(() => {
+    if (!canManage) return;
+
+    let cancelled = false;
+
+    const loadAssignees = async () => {
+      try {
+        const response = await usersApi.listAssignees();
+        if (!cancelled) {
+          setAssignees(response.data.assignees);
+          setAssigneeError("");
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setAssigneeError(getApiError(err, "Failed to load assignees"));
+        }
+      }
+    };
+
+    void loadAssignees();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [canManage]);
 
   const handleAddComment = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -115,6 +150,13 @@ export default function TicketDetail() {
     if (draft.status !== ticket.status) changes.status = draft.status;
     if (canManage && draft.priority !== ticket.priority) {
       changes.priority = draft.priority;
+    }
+    if (
+      canManage &&
+      draft.assigneeId !== null &&
+      draft.assigneeId !== ticket.assignee_id
+    ) {
+      changes.assignee_id = draft.assigneeId;
     }
 
     if (Object.keys(changes).length === 0) {
@@ -359,15 +401,48 @@ export default function TicketDetail() {
                 </Field>
               )}
 
-              <div>
-                <span className="label">Assignee</span>
-                <p className="text-sm text-ink/70">
-                  {ticket.assignee_id
-                    ? `User #${ticket.assignee_id}`
-                    : "Unassigned"}
-                </p>
-              </div>
+              {canManage ? (
+                <Field label="Assignee">
+                  {({ id }) => (
+                    <select
+                      id={id}
+                      name="assignee"
+                      className="input"
+                      value={draft.assigneeId ?? ""}
+                      onChange={(event) =>
+                        setDraft((current) => ({
+                          ...current,
+                          assigneeId: event.target.value
+                            ? Number(event.target.value)
+                            : null,
+                        }))
+                      }
+                    >
+                      <option value="" disabled>
+                        Unassigned{draft.assigneeId === null ? " (current)" : ""}
+                      </option>
+                      {assignees.map((assignee) => (
+                        <option key={assignee.id} value={assignee.id}>
+                          {assignee.email} ({assignee.role})
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </Field>
+              ) : (
+                <div>
+                  <span className="label">Assignee</span>
+                  <p className="text-sm text-ink/70">
+                    {ticket.assignee_id
+                      ? `User #${ticket.assignee_id}`
+                      : "Unassigned"}
+                  </p>
+                </div>
+              )}
 
+              {assigneeError && (
+                <Alert tone="error">{assigneeError}</Alert>
+              )}
               {updateError && (
                 <Alert tone="error">{updateError}</Alert>
               )}

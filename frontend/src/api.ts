@@ -1,5 +1,6 @@
 import axios from "axios";
 import type {
+  Assignee,
   Comment,
   PaginatedTickets,
   Ticket,
@@ -130,6 +131,10 @@ interface CommentsResponse {
   comments: Comment[];
 }
 
+interface AssigneesResponse {
+  assignees: Assignee[];
+}
+
 export const authApi = {
   register: (email: string, password: string) =>
     api.post<RegisterResponse>("/auth/register", { email, password }),
@@ -138,6 +143,10 @@ export const authApi = {
     api.post<AuthResponse>("/auth/login", { email, password }),
 
   getMe: () => api.get<UserResponse>("/auth/me"),
+};
+
+export const usersApi = {
+  listAssignees: () => api.get<AssigneesResponse>("/users/assignees"),
 };
 
 export const ticketApi = {

@@ -43,9 +43,11 @@ def create_app(test_config: dict | None = None) -> Flask:
 
     from app.api.auth.routes import auth_bp
     from app.api.tickets.routes import tickets_bp
+    from app.api.users.routes import users_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(tickets_bp, url_prefix="/api/tickets")
+    app.register_blueprint(users_bp, url_prefix="/api/users")
 
     register_request_logging(app)
 

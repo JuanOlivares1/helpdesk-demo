@@ -9,6 +9,8 @@ export interface User {
   created_at: string;
 }
 
+export type Assignee = Pick<User, "id" | "email" | "role">;
+
 export interface Ticket {
   id: number;
   title: string;
