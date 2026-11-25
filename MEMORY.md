@@ -7,8 +7,10 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - Task 1 done: `AGENTS.md` rewritten from `AGENTS_TEMPLATE.md`; `MEMORY.md` seeded.
 - Task 2 done: UI audit applied and frontend redesigned (tokens, responsive auth, accessible forms, URL filters/pagination/dialog, progress rail, role-aware editing).
 - Task 3 done: `GET /api/users/assignees` (admin/agent only) plus assignee selector in ticket detail; README/AGENTS updated.
-- The `ui-design-audit` branch/worktree was removed at the user's request; all changes were copied into the original directory and remain uncommitted. The user handles git/PR.
-- Verification passed: `pytest` (40 tests) and `npm run lint && npm run build`.
+- Committed on `main`: `877f5c3` (docs + UI redesign) and `442051f` (assignee endpoint). The user pushes; no PR was opened by the agent.
+- The `ui-design-audit` branch/worktree was removed; all changes were copied into the original directory.
+- Dev DB seeded additively: one demo user per role and 30 generic tickets with no comments; the pre-existing tickets/comments were preserved.
+- Verification passed: `pytest` (40 tests), `npm run lint && npm run build`, and an API smoke check on the seeded DB.
 
 ## Aprendizajes y errores a evitar
 
@@ -26,7 +28,7 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 
 ## Próximos pasos
 
-1. User commits and opens the PR; address review feedback only after that.
+1. User pushes the commits and opens the PR if needed; address review feedback only after that.
 2. Full-stack manual check: `/health`, login, ticket list/detail, assignee change, mobile viewport and keyboard focus order.
 3. If requested, add unassign support or an admin endpoint to create/promote admin/agent users.
 
