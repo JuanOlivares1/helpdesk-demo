@@ -5,6 +5,7 @@ Sistema multiusuario de tickets con backend **Flask + SQLAlchemy + JWT** y front
 ## Funcionalidad
 
 - Registro y login con JWT; el registro público siempre crea usuarios `client`.
+- Los admins pueden crear usuarios con rol y cambiar roles; no pueden degradarse a sí mismos.
 - Roles `admin`, `agent` y `client` con permisos diferenciados.
 - Tickets con estado, prioridad, filtros y paginación.
 - Comentarios por ticket.
@@ -83,13 +84,16 @@ En desarrollo y tests `CREATE_TABLES=True` ejecuta `db.create_all()`. En producc
 | POST | `/api/auth/register` | Registro (siempre rol `client`) |
 | POST | `/api/auth/login` | Login y obtención del JWT |
 | GET | `/api/auth/me` | Usuario autenticado |
+| GET | `/api/users/` | Listado de usuarios (admin) |
+| POST | `/api/users/` | Creación de usuario con rol (admin) |
+| PATCH | `/api/users/<id>` | Cambio de rol (admin) |
 | GET | `/api/users/assignees` | Usuarios asignables (admin/agent) |
 | GET/POST | `/api/tickets/` | Listado paginado / creación |
 | GET/PATCH | `/api/tickets/<id>` | Detalle / actualización |
 | GET/POST | `/api/tickets/<id>/comments` | Listado / creación de comentarios |
 | GET | `/health` | Healthcheck |
 
-Los errores de validación devuelven `422` con `{"errors": {...}}`; el resto de errores usan `{"error": "..."}` (`400`, `401`, `403`, `404`, `409`, `500`).
+Los errores de validación devuelven `422` con `{"errors": {...}}`; el resto de errores usan `{"error": "..."}` (`400`, `401`, `403`, `404`, `409`, `500`). Un admin no puede cambiar su propio rol a `agent` o `client`: la respuesta es `400` con `{"error": "admins cannot demote themselves"}`.
 
 ## Tests y verificación
 
@@ -104,6 +108,6 @@ npm run build
 npm run test:e2e
 ```
 
-Actualmente pasan **44 tests** en el backend. El frontend tiene una suite E2E con Playwright (24 pruebas: escritorio y móvil) que usa una copia desechable de la base de desarrollo y levanta sus propios servidores en los puertos 5001 y 5174; no modifica la base ni los servidores locales. La verificación del frontend es lint + build + E2E.
+Actualmente pasan **56 tests** en el backend. El frontend tiene una suite E2E con Playwright (24 pruebas: escritorio y móvil) que usa una copia desechable de la base de desarrollo y levanta sus propios servidores en los puertos 5001 y 5174; no modifica la base ni los servidores locales. La verificación del frontend es lint + build + E2E.
 
 Las fechas de la API se serializan siempre como ISO 8601 en UTC (`+00:00`). Los valores antiguos sin zona se interpretan como UTC; la migración `c4f1a9b2d7e3` actualiza las filas existentes y las columnas pasan a `DateTime(timezone=True)`.

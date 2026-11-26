@@ -9,7 +9,7 @@ Multi-user ticket helpdesk for clients and support teams. The backend is Flask +
 - `backend/app/__init__.py`: `create_app` factory; selects config, initializes logging/extensions/error handlers, registers `auth_bp` at `/api/auth` and `tickets_bp` at `/api/tickets`, and exposes `/health` without auth.
 - `backend/app/config.py`: `BaseConfig`, `DevelopmentConfig`, `TestingConfig`, `ProductionConfig`; reads `FLASK_ENV`/`APP_ENV`, `DATABASE_URL`, `SECRET_KEY`, `JWT_SECRET_KEY`, `LOG_LEVEL`, `LOG_JSON`, `CORS_ORIGINS`.
 - `backend/app/logging.py`, `errors.py`, `exceptions.py`: JSON or readable logs with `X-Request-ID`; global handlers for 422 validation, 400/403/404/409 API errors, 401 JWT errors and 500 SQLAlchemy errors.
-- `backend/app/api/auth/`: `routes.py`, `schemas.py`, `service.py`, `decorators.py` (`role_required`). `backend/app/api/tickets/`: `routes.py`, `schemas.py`, `service.py`; permissions and pagination live in the service. `backend/app/api/users/`: `routes.py`, `service.py`; `users_bp` is registered at `/api/users` and exposes assignable admins/agents.
+- `backend/app/api/auth/`: `routes.py`, `schemas.py`, `service.py`, `decorators.py` (`role_required`). `backend/app/api/tickets/`: `routes.py`, `schemas.py`, `service.py`; permissions and pagination live in the service. `backend/app/api/users/`: `routes.py`, `schemas.py`, `service.py`; `users_bp` is registered at `/api/users` and exposes admin user management plus assignable admins/agents.
 - `backend/app/api/dependencies.py`: `current_user()` from the JWT. `backend/app/models.py`: `User`, `Ticket`, `Comment`; extensions in `extensions.py`, domain constants in `constants.py`.
 - `backend/migrations/`: Flask-Migrate; initial revision `ea26a6ef442b`. `backend/instance/helpdesk.db` is the ignored development database.
 - `frontend/src/api.ts`: typed axios client, base `VITE_API_URL` (default `http://localhost:5000/api`), token in `localStorage` as `token`, 401 redirect except on login/register.
@@ -79,13 +79,14 @@ docker compose up --build
 - Roles: `admin`, `agent`, `client`. Clients see and comment only their own tickets (`user_id`) and may only change status to `resolved`/`closed`. Admins and agents see all tickets, can change status/priority and assign to another admin/agent. Creating tickets is allowed for admin and client, not agent.
 - There is no tenant/organization column: isolation is based on `user_id` only.
 - The JWT stores identity as `str(user.id)`; convert it with `int()` when querying users.
-- Public registration ignores `role` and forces `client`; schemas use `unknown=EXCLUDE`. There is no endpoint to create/promote admins or agents yet (see `MEMORY.md`).
+- Public registration ignores `role` and forces `client`; schemas use `unknown=EXCLUDE`. Only an admin can create users with a chosen role or change roles through `/api/users`, and self-demotion is rejected with `400`.
 - Validation errors return `422 {"errors": {...}}`; every other error uses `{"error": "..."}`.
 - `DevelopmentConfig` and `TestingConfig` set `CREATE_TABLES=True` and call `db.create_all()`. `ProductionConfig` (`APP_ENV=production`) does not: run `flask db upgrade`. If a development database predates migrations, run `flask db stamp head` first. Model changes do not migrate themselves.
 - There are no CI workflows or pre-commit hooks; run checks manually.
 
 ## Forma de trabajar
 
+- Have in mind that we are working on windows with wsl, try to only use the ubuntu environment and only access windows programs or files when needed, always ask the user when trying to use something outside wsl.
 - Do only what is asked; do not add features on your own without asking first.
 - Spec-driven development: define the task, execute it, verify it, then move to the next one. One task at a time.
 - Read `MEMORY.md` at the start of a session and update it when a task finishes.

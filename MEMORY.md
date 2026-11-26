@@ -11,9 +11,10 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - Dev DB seeded additively: one demo user per role and 30 generic tickets with no comments; the pre-existing tickets/comments were preserved.
 - Task 4 done: deprecated `datetime.utcnow()` replaced with timezone-aware UTC and the short test JWT secret replaced.
 - Task 5 done: full-stack HTTP check (`/health`, login, list/detail/comments, assignees, 401/403/422, assignee patch).
-- Task 6 done: Playwright E2E suite (22 tests at the time; now 24) with a disposable DB copy and isolated ports 5001/5174; `npm run lint && npm run build && npm run test:e2e` passed.
+- Task 6 done: Playwright E2E suite (22 tests at the time; now 24) with a disposable DB copy and isolated ports 5001/5174; `npm run lint && npm run build && npm run test:e2e` passed; fixed a `TicketForm` focus race.
 - Task 7 done: UTC timestamp normalization via `iso_utc()` plus migration `c4f1a9b2d7e3` (aware columns and legacy rows interpreted as UTC); dev DB stamped and upgraded with a backup in `/tmp/opencode/helpdesk-before-utc-migration.db`.
-- The E2E run exposed a focus race in `TicketForm`: `requestAnimationFrame` could fire before `aria-invalid` was rendered; it now focuses the first invalid field in a `useEffect` keyed to `fieldErrors`.
+- Project-local chrome-devtools MCP verified via `opencode run --standalone`: `chrome-devtools-mcp@latest --headless=true` uses Ubuntu Chrome; Windows Chrome over WSL cannot expose CDP. Restart OpenCode if MCP tools vanish after config edits.
+- Task 8 done: admin-only user management (`GET/POST /api/users`, `PATCH /api/users/<id>`) with role validation, duplicate check, self-demotion guard, and 12 new tests (56 total).
 
 ## Aprendizajes y errores a evitar
 
@@ -36,12 +37,11 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 ## Próximos pasos
 
 1. User pushes the commits and opens the PR if needed; address review feedback only after that.
-2. If requested, add unassign support or an admin endpoint to create/promote admin/agent users.
+2. If requested, add unassign support for tickets.
 
 Backlog from the previous session:
 
-- If more coverage is needed, add Vitest + Testing Library for component-level tests.
-- Test `docker-compose.yml` in an environment with Docker.
+- If more coverage is needed, add Vitest + Testing Library tests and verify `docker-compose.yml` with Docker.
 - Review the unused `bcrypt` dependency in `requirements.txt`.
 - Add CI for tests, lint and build.
 - Consider refresh tokens, rate limiting and a database check in `/health`.
