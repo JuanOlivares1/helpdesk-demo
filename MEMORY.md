@@ -19,6 +19,7 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - Task 10 done: ticket unassignment via `assignee_id: null` on PATCH; admin/agent only, `Unassigned` option in the detail selector, 4 backend tests (60 total) and 1 E2E test (36 total).
 - Task 11 done: removed unused `bcrypt==4.2.1` from `backend/requirements.txt`; hashing stays in `werkzeug.security`.
 - Task 12 done: Vitest 5 + RTL + jest-dom + jsdom unit tests (12 tests) for api helpers, `Alert`, `Field` and `Pagination`; `npm test` added and full frontend verification passes.
+- Task 13 done: Docker Compose verified with Windows Docker Desktop from WSL; fixed the folded `command` that broke Gunicorn. `/health` 200, migration head, register/login/tickets and role check pass; isolated stack removed.
 
 ## Aprendizajes y errores a evitar
 
@@ -29,6 +30,8 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - Ports 5000 and 5173 are usually occupied by the user's own dev servers; use 5001/5174 for isolated checks and stop only the processes you started.
 - `sudo npx` fails (`npx: command not found`); install Playwright system deps with `npx playwright install --with-deps chromium` (with a password prompt) or `sudo apt-get install libnspr4 libnss3 libasound2t64`.
 - SQLite drops timezone offsets from ORM writes even with `DateTime(timezone=True)`; `iso_utc()` is the API contract, while the migration normalizes stored legacy rows.
+- A folded YAML `command: >` keeps embedded newlines when later lines are indented further; `sh -c` then ran only the first line. Keep shell commands on one Compose line (or use a list).
+- Docker Desktop on Windows can be driven from WSL via `/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe`; use an isolated Compose project name and `down -v` afterwards.
 
 ## Decisiones (y por qué)
 
@@ -47,7 +50,6 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 
 Backlog from the previous session:
 
-- Verify `docker-compose.yml` with Docker if the environment allows it.
 - Add CI for tests, lint and build.
 - Review the 9 moderate dev-only npm advisories (`minimatch` via ESLint toolchain); production audit is clean.
 - Decide whether development should keep `create_all()` or move fully to migrations.
