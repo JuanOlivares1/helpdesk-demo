@@ -50,5 +50,5 @@ export interface PaginatedTickets {
 export interface TicketUpdatePayload {
   status?: TicketStatus;
   priority?: TicketPriority;
-  assignee_id?: number;
+  assignee_id?: number | null;
 }

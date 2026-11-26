@@ -1,4 +1,4 @@
-"""Schemas de validación para tickets y comentarios."""
+"""Validation schemas for tickets and comments."""
 
 from marshmallow import EXCLUDE, Schema, fields, validate
 
@@ -6,7 +6,7 @@ from app.constants import TICKET_PRIORITIES, TICKET_STATUSES
 
 
 class TicketCreateSchema(Schema):
-    """Valida la creación de un ticket."""
+    """Validate ticket creation."""
 
     title = fields.String(
         required=True,
@@ -26,18 +26,21 @@ class TicketCreateSchema(Schema):
 
 
 class TicketUpdateSchema(Schema):
-    """Valida la actualización parcial de un ticket."""
+    """Validate partial ticket updates; a null assignee clears the assignment."""
 
     status = fields.String(validate=validate.OneOf(TICKET_STATUSES))
     priority = fields.String(validate=validate.OneOf(TICKET_PRIORITIES))
-    assignee_id = fields.Integer(validate=validate.Range(min=1))
+    assignee_id = fields.Integer(
+        validate=validate.Range(min=1),
+        allow_none=True,
+    )
 
     class Meta:
         unknown = EXCLUDE
 
 
 class TicketListQuerySchema(Schema):
-    """Valida los parámetros de listado y paginación."""
+    """Validate listing and pagination parameters."""
 
     page = fields.Integer(load_default=1, validate=validate.Range(min=1))
     per_page = fields.Integer(
@@ -51,7 +54,7 @@ class TicketListQuerySchema(Schema):
 
 
 class CommentCreateSchema(Schema):
-    """Valida la creación de un comentario."""
+    """Validate comment creation."""
 
     body = fields.String(
         required=True,

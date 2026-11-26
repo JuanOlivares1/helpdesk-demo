@@ -76,10 +76,11 @@ docker compose up --build
 ## Reglas de dominio / trampas conocidas
 
 - PostgreSQL is used in Docker/production; SQLite is used for tests (in memory) and for the ignored development database `backend/instance/helpdesk.db`.
-- Roles: `admin`, `agent`, `client`. Clients see and comment only their own tickets (`user_id`) and may only change status to `resolved`/`closed`. Admins and agents see all tickets, can change status/priority and assign to another admin/agent. Creating tickets is allowed for admin and client, not agent.
+- Roles: `admin`, `agent`, `client`. Clients see and comment only their own tickets (`user_id`) and may only change status to `resolved`/`closed`. Admins and agents see all tickets, can change status/priority and assign or unassign tickets; assignees must be admin/agent. Creating tickets is allowed for admin and client, not agent.
 - There is no tenant/organization column: isolation is based on `user_id` only.
 - The JWT stores identity as `str(user.id)`; convert it with `int()` when querying users.
 - Public registration ignores `role` and forces `client`; schemas use `unknown=EXCLUDE`. Only an admin can create users with a chosen role or change roles through `/api/users`, and self-demotion is rejected with `400`.
+- `PATCH /api/tickets/<id>` accepts `assignee_id: null` to clear an assignment; omitting the field leaves it unchanged. Clients sending `assignee_id` get `400`.
 - Validation errors return `422 {"errors": {...}}`; every other error uses `{"error": "..."}`.
 - `DevelopmentConfig` and `TestingConfig` set `CREATE_TABLES=True` and call `db.create_all()`. `ProductionConfig` (`APP_ENV=production`) does not: run `flask db upgrade`. If a development database predates migrations, run `flask db stamp head` first. Model changes do not migrate themselves.
 - There are no CI workflows or pre-commit hooks; run checks manually.

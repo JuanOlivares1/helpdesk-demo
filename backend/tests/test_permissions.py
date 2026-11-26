@@ -1,4 +1,4 @@
-"""Tests de permisos, paginación y casos límite."""
+"""Tests for permissions, pagination and edge cases."""
 
 import pytest
 
@@ -61,7 +61,7 @@ def create_ticket(
     client,
     token: str,
     title: str = "Ticket",
-    description: str = "Descripción",
+    description: str = "Description",
 ) -> dict:
     response = client.post(
         "/api/tickets/",
@@ -77,7 +77,7 @@ def test_agent_cannot_create_ticket(client):
 
     response = client.post(
         "/api/tickets/",
-        json={"title": "Ticket", "description": "Descripción"},
+        json={"title": "Ticket", "description": "Description"},
         headers=auth(agent_token),
     )
 
@@ -192,6 +192,97 @@ def test_cannot_assign_client(client):
     assert response.get_json() == {
         "error": "assignee must be admin or agent"
     }
+
+
+def test_admin_can_unassign_ticket(client):
+    admin_token, _ = login(client, "admin@test.com")
+    client_token, _ = login(client, "client@test.com")
+    _, agent = login(client, "agent@test.com")
+    ticket = create_ticket(client, client_token)
+
+    assigned = client.patch(
+        f"/api/tickets/{ticket['id']}",
+        json={"assignee_id": agent["id"]},
+        headers=auth(admin_token),
+    )
+    assert assigned.status_code == 200
+
+    response = client.patch(
+        f"/api/tickets/{ticket['id']}",
+        json={"assignee_id": None},
+        headers=auth(admin_token),
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["ticket"]["assignee_id"] is None
+
+
+def test_agent_can_unassign_ticket(client):
+    admin_token, _ = login(client, "admin@test.com")
+    agent_token, _ = login(client, "agent@test.com")
+    client_token, _ = login(client, "client@test.com")
+    _, agent = login(client, "agent@test.com")
+    ticket = create_ticket(client, client_token)
+
+    assigned = client.patch(
+        f"/api/tickets/{ticket['id']}",
+        json={"assignee_id": agent["id"]},
+        headers=auth(admin_token),
+    )
+    assert assigned.status_code == 200
+
+    response = client.patch(
+        f"/api/tickets/{ticket['id']}",
+        json={"assignee_id": None},
+        headers=auth(agent_token),
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["ticket"]["assignee_id"] is None
+
+
+def test_client_cannot_unassign_ticket(client):
+    admin_token, _ = login(client, "admin@test.com")
+    client_token, _ = login(client, "client@test.com")
+    _, agent = login(client, "agent@test.com")
+    ticket = create_ticket(client, client_token)
+
+    assigned = client.patch(
+        f"/api/tickets/{ticket['id']}",
+        json={"assignee_id": agent["id"]},
+        headers=auth(admin_token),
+    )
+    assert assigned.status_code == 200
+
+    response = client.patch(
+        f"/api/tickets/{ticket['id']}",
+        json={"assignee_id": None},
+        headers=auth(client_token),
+    )
+
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "clients cannot change assignees"}
+
+    current = client.get(
+        f"/api/tickets/{ticket['id']}",
+        headers=auth(admin_token),
+    )
+    assert current.get_json()["ticket"]["assignee_id"] == agent["id"]
+
+
+def test_unassigning_an_unassigned_ticket_succeeds(client):
+    admin_token, _ = login(client, "admin@test.com")
+    client_token, _ = login(client, "client@test.com")
+    ticket = create_ticket(client, client_token)
+
+    response = client.patch(
+        f"/api/tickets/{ticket['id']}",
+        json={"assignee_id": None},
+        headers=auth(admin_token),
+    )
+
+    assert response.status_code == 200
+    assert response.get_json()["ticket"]["assignee_id"] is None
 
 
 def test_missing_ticket_returns_404(client):

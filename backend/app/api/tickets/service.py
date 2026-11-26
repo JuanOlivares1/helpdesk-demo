@@ -69,13 +69,17 @@ def update_ticket(user: User, ticket_id: int, data: dict) -> Ticket:
             ticket.status = data["status"]
         if data.get("priority"):
             ticket.priority = data["priority"]
-        if data.get("assignee_id"):
-            assignee = db.session.get(User, data["assignee_id"])
-            if assignee and assignee.role in ("admin", "agent"):
-                ticket.assignee_id = data["assignee_id"]
+        if "assignee_id" in data:
+            if data["assignee_id"] is None:
+                ticket.assignee_id = None
             else:
-                raise BadRequestError("assignee must be admin or agent")
+                assignee = db.session.get(User, data["assignee_id"])
+                if not assignee or assignee.role not in ("admin", "agent"):
+                    raise BadRequestError("assignee must be admin or agent")
+                ticket.assignee_id = data["assignee_id"]
     else:
+        if "assignee_id" in data:
+            raise BadRequestError("clients cannot change assignees")
         if data.get("status") in CLIENT_ALLOWED_STATUSES:
             ticket.status = data["status"]
         else:

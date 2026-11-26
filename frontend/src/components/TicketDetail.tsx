@@ -151,11 +151,7 @@ export default function TicketDetail() {
     if (canManage && draft.priority !== ticket.priority) {
       changes.priority = draft.priority;
     }
-    if (
-      canManage &&
-      draft.assigneeId !== null &&
-      draft.assigneeId !== ticket.assignee_id
-    ) {
+    if (canManage && draft.assigneeId !== ticket.assignee_id) {
       changes.assignee_id = draft.assigneeId;
     }
 
@@ -418,7 +414,7 @@ export default function TicketDetail() {
                         }))
                       }
                     >
-                      <option value="" disabled>
+                      <option value="">
                         Unassigned{draft.assigneeId === null ? " (current)" : ""}
                       </option>
                       {assignees.map((assignee) => (

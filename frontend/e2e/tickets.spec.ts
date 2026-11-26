@@ -85,6 +85,51 @@ test("updates triage fields and adds a comment", async ({ page }) => {
   await expect(page.getByText("E2E progress note")).toBeVisible();
 });
 
+test("clears an assignment from the ticket detail", async ({ page }) => {
+  await signIn(page, "admin.demo@helpdesk.test");
+
+  const token = await page.evaluate(() => localStorage.getItem("token"));
+  const headers = { Authorization: `Bearer ${token}` };
+  const created = await page.request.post(`${API_URL}/tickets/`, {
+    headers,
+    data: {
+      title: `E2E assignment ${Date.now()}`,
+      description: "Created to verify clearing an assignment.",
+      priority: "medium",
+    },
+  });
+  expect(created.ok()).toBeTruthy();
+
+  const ticketId = (await created.json()).ticket.id as number;
+  await page.goto(`/ticket/${ticketId}`);
+
+  const assignee = page.getByLabel("Assignee");
+  const saveChanges = async () => {
+    const response = page.waitForResponse(
+      (candidate) =>
+        candidate.url().includes(`/api/tickets/${ticketId}`) &&
+        candidate.request().method() === "PATCH",
+    );
+    await page.getByRole("button", { name: "Save changes" }).click();
+    return (await response).status();
+  };
+
+  await assignee.selectOption({ index: 1 });
+  expect(await saveChanges()).toBe(200);
+  await expect(assignee).not.toHaveValue("");
+
+  await assignee.selectOption("");
+  expect(await saveChanges()).toBe(200);
+  await expect(page.getByText("Ticket updated.")).toBeVisible();
+
+  const response = await page.request.get(`${API_URL}/tickets/${ticketId}`, {
+    headers,
+  });
+
+  expect(response.ok()).toBeTruthy();
+  expect((await response.json()).ticket.assignee_id).toBeNull();
+});
+
 test("fits the viewport without horizontal overflow", async ({ page }) => {
   await signIn(page, "client.demo@helpdesk.test");
 
