@@ -5,7 +5,7 @@ Multi-user ticket helpdesk for clients and support teams. The backend is Flask +
 ## Stack y estructura
 
 - Backend: Flask 3.1, Flask-SQLAlchemy 3.1, Flask-JWT-Extended 4.7, Flask-CORS 5.0, Flask-Migrate 4.1, Marshmallow 4.4, Gunicorn 23, psycopg 3.3. Python 3.12; the virtualenv is included in `backend/venv/`.
-- Frontend: React 19.3, TypeScript 6, Vite 8, React Router 7.18, Axios 1.21, Tailwind CSS 4.3 with `@tailwindcss/vite`. Node 20+ (tested with 22).
+- Frontend: React 19.3, TypeScript 6, Vite 8, React Router 7.18, Axios 1.21, Tailwind CSS 4.3 with `@tailwindcss/vite`, Vitest 5 and React Testing Library for unit tests. Node 20+ (tested with 22).
 - `backend/app/__init__.py`: `create_app` factory; selects config, initializes logging/extensions/error handlers, registers `auth_bp` at `/api/auth` and `tickets_bp` at `/api/tickets`, and exposes `/health` without auth.
 - `backend/app/config.py`: `BaseConfig`, `DevelopmentConfig`, `TestingConfig`, `ProductionConfig`; reads `FLASK_ENV`/`APP_ENV`, `DATABASE_URL`, `SECRET_KEY`, `JWT_SECRET_KEY`, `LOG_LEVEL`, `LOG_JSON`, `CORS_ORIGINS`.
 - `backend/app/logging.py`, `errors.py`, `exceptions.py`: JSON or readable logs with `X-Request-ID`; global handlers for 422 validation, 400/403/404/409 API errors, 401 JWT errors and 500 SQLAlchemy errors.
@@ -16,6 +16,7 @@ Multi-user ticket helpdesk for clients and support teams. The backend is Flask +
 - `frontend/src/auth/`: `AuthProvider` validates the token with `/auth/me`; `useAuth` exposes `user`, `token`, `loading`, `login`, `logout`, `refreshUser`.
 - `frontend/src/App.tsx`: `/login`, `/register`, `/`, `/ticket/:id`, `/users` (admins only) and a 404 route; `PrivateRoute`/`PublicOnlyRoute`/`AdminRoute` wait for `loading`.
 - `frontend/src/types.ts`: API types. `frontend/src/ticket-meta.ts`: status/priority labels and badge classes. `frontend/src/index.css`: Tailwind v4 semantic component classes and theme tokens.
+- `frontend/vite.config.ts`: Vite plugins plus Vitest config (`jsdom`, `src/test/setup.ts`, only `src/**/*.test.{ts,tsx}`); unit tests live beside the code they cover.
 - `docker-compose.yml`: PostgreSQL 16 plus backend with Gunicorn; runs `flask db upgrade` before starting. The frontend runs separately with `npm run dev`.
 
 ## Comandos
@@ -46,7 +47,7 @@ flask --app app db migrate -m "describe the change"
 flask --app app db downgrade
 ```
 
-Frontend (Playwright E2E covers desktop and mobile; verification is lint + build + E2E):
+Frontend (Vitest unit tests cover helpers and small components; Playwright E2E covers desktop and mobile; verification is `npm test` + lint + build + E2E):
 
 ```bash
 cd frontend
@@ -112,7 +113,7 @@ docker compose up --build
 Cómo comprobar que un cambio funciona antes de darlo por terminado:
 
 - Backend: `pytest`; when models change, also apply `cd backend && flask --app app db upgrade` against a disposable database.
-- Frontend: `cd frontend && npm run lint && npm run build && npm run test:e2e` (E2E needs Chromium installed once with `npx playwright install --with-deps chromium`).
+- Frontend: `cd frontend && npm test && npm run lint && npm run build && npm run test:e2e` (E2E needs Chromium installed once with `npx playwright install --with-deps chromium`).
 - Full stack: the E2E suite already checks `/health` indirectly plus login, list/detail, triage, comments, user creation/role changes, mobile viewport and keyboard focus; the HTTP smoke check is still useful for API-only changes.
 - Playwright uses a disposable database copy and isolated ports 5001/5174; never point it at the development database or stop the user's servers on 5000/5173.
 - Manual only: no CI workflows or pre-commit hooks exist yet.

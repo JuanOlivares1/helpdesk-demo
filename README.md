@@ -103,11 +103,12 @@ pytest
 pytest --cov=app --cov-report=term-missing
 
 cd frontend
+npm test
 npm run lint
 npm run build
 npm run test:e2e
 ```
 
-Actualmente pasan **60 tests** en el backend. El frontend tiene una suite E2E con Playwright (36 pruebas: escritorio y móvil) que usa una copia desechable de la base de desarrollo y levanta sus propios servidores en los puertos 5001 y 5174; no modifica la base ni los servidores locales. La verificación del frontend es lint + build + E2E.
+Actualmente pasan **60 tests** en el backend. El frontend tiene 12 tests unitarios con Vitest y React Testing Library, y una suite E2E con Playwright (36 pruebas: escritorio y móvil) que usa una copia desechable de la base de desarrollo y levanta sus propios servidores en los puertos 5001 y 5174; no modifica la base ni los servidores locales. La verificación del frontend es `npm test` + lint + build + E2E.
 
 Las fechas de la API se serializan siempre como ISO 8601 en UTC (`+00:00`). Los valores antiguos sin zona se interpretan como UTC; la migración `c4f1a9b2d7e3` actualiza las filas existentes y las columnas pasan a `DateTime(timezone=True)`.

@@ -18,6 +18,7 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - Task 9 done: admin-only `/users` UI (`UserAdmin`, `NewUserDialog`) with inline role changes, self row locked, `AdminRoute`, navbar link and 5 new E2E tests (34 total).
 - Task 10 done: ticket unassignment via `assignee_id: null` on PATCH; admin/agent only, `Unassigned` option in the detail selector, 4 backend tests (60 total) and 1 E2E test (36 total).
 - Task 11 done: removed unused `bcrypt==4.2.1` from `backend/requirements.txt`; hashing stays in `werkzeug.security`.
+- Task 12 done: Vitest 5 + RTL + jest-dom + jsdom unit tests (12 tests) for api helpers, `Alert`, `Field` and `Pagination`; `npm test` added and full frontend verification passes.
 
 ## Aprendizajes y errores a evitar
 
@@ -33,7 +34,8 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 
 - Keep Spanish headings in `AGENTS.md` because the template is Spanish; application code, UI and comments stay English for a portfolio-quality project.
 - Filters, pagination and the new-ticket dialog live in URL search params to support deep links and back/forward navigation.
-- IBM Plex Sans/Mono is loaded from Google Fonts with `preconnect`; no npm dependency was added.
+- IBM Plex Sans/Mono is loaded from Google Fonts with `preconnect`; font files are not an npm dependency.
+- Vitest only includes `src/**/*.test.{ts,tsx}`: without that filter it collects Playwright specs and fails because both frameworks define `test()`.
 - Password hashing relies on `werkzeug.security` defaults; the explicit `bcrypt` requirement was dead weight and was removed.
 - The assignee selector is limited to admin/agent and can clear an assignment with `assignee_id: null`; an omitted field leaves it unchanged. Clients sending `assignee_id` get `400` instead of being silently ignored.
 - All API timestamps are UTC ISO 8601 with `+00:00`; naive legacy values are interpreted as UTC because they were written with `datetime.utcnow()`. Migration `c4f1a9b2d7e3` updates columns and existing rows; PostgreSQL uses `AT TIME ZONE 'UTC'` and SQLite uses a batch alter plus a raw value rewrite.
@@ -45,8 +47,9 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 
 Backlog from the previous session:
 
-- If more coverage is needed, add Vitest + Testing Library tests and verify `docker-compose.yml` with Docker.
+- Verify `docker-compose.yml` with Docker if the environment allows it.
 - Add CI for tests, lint and build.
+- Review the 9 moderate dev-only npm advisories (`minimatch` via ESLint toolchain); production audit is clean.
 - Decide whether development should keep `create_all()` or move fully to migrations.
 
 In short: the project has clear layers, consistent errors, declarative validation, a typed and accessible frontend, a versioned schema and a realistic PostgreSQL/Gunicorn deployment path.
