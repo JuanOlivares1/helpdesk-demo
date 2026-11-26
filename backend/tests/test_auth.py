@@ -9,7 +9,7 @@ def app():
     app = create_app({
         'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
-        'JWT_SECRET_KEY': 'test-jwt-secret'
+        'JWT_SECRET_KEY': 'test-jwt-secret-32chars-long-key'
     })
 
     with app.app_context():

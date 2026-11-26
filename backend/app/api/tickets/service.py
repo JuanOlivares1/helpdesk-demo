@@ -1,6 +1,6 @@
-"""Lógica de negocio de tickets y comentarios."""
+"""Business logic for tickets and comments."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from app.constants import CLIENT_ALLOWED_STATUSES
 from app.exceptions import BadRequestError, NotFoundError, PermissionDeniedError
@@ -9,7 +9,7 @@ from app.models import Comment, Ticket, User
 
 
 def _get_accessible_ticket(user: User, ticket_id: int) -> Ticket:
-    """Busca un ticket y valida que el usuario pueda acceder a él."""
+    """Find a ticket and verify that the user is allowed to access it."""
     ticket = db.session.get(Ticket, ticket_id)
 
     if not ticket:
@@ -22,7 +22,7 @@ def _get_accessible_ticket(user: User, ticket_id: int) -> Ticket:
 
 
 def create_ticket(user: User, data: dict) -> Ticket:
-    """Crea un ticket para el usuario autenticado."""
+    """Create a ticket owned by the authenticated user."""
     ticket = Ticket(
         title=data["title"],
         description=data["description"],
@@ -37,7 +37,7 @@ def create_ticket(user: User, data: dict) -> Ticket:
 
 
 def list_tickets(user: User, params: dict):
-    """Lista tickets visibles con filtros y paginación."""
+    """List visible tickets with filters and pagination."""
     query = Ticket.query
 
     if user.role == "client":
@@ -56,12 +56,12 @@ def list_tickets(user: User, params: dict):
 
 
 def get_ticket(user: User, ticket_id: int) -> Ticket:
-    """Devuelve un ticket accesible para el usuario."""
+    """Return a ticket that the user is allowed to see."""
     return _get_accessible_ticket(user, ticket_id)
 
 
 def update_ticket(user: User, ticket_id: int, data: dict) -> Ticket:
-    """Actualiza un ticket respetando los permisos por rol."""
+    """Update a ticket according to the permissions of the user's role."""
     ticket = _get_accessible_ticket(user, ticket_id)
 
     if user.role in ("admin", "agent"):
@@ -83,14 +83,14 @@ def update_ticket(user: User, ticket_id: int, data: dict) -> Ticket:
                 "clients can only change status to resolved or closed"
             )
 
-    ticket.updated_at = datetime.utcnow()
+    ticket.updated_at = datetime.now(UTC)
     db.session.commit()
 
     return ticket
 
 
 def add_comment(user: User, ticket_id: int, body: str) -> Comment:
-    """Añade un comentario a un ticket accesible."""
+    """Add a comment to a ticket the user can access."""
     _get_accessible_ticket(user, ticket_id)
 
     comment = Comment(
@@ -106,9 +106,7 @@ def add_comment(user: User, ticket_id: int, body: str) -> Comment:
 
 
 def list_comments(user: User, ticket_id: int) -> list[Comment]:
-    """Lista los comentarios de un ticket accesible."""
-    _get_accessible_ticket(user, ticket_id)
-
+    """List the comments of a ticket the user can access."""
     return (
         Comment.query.filter_by(ticket_id=ticket_id)
         .order_by(Comment.created_at.asc())

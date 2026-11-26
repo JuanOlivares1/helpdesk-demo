@@ -10,14 +10,15 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - Committed on `main`: `877f5c3` (docs + UI redesign) and `442051f` (assignee endpoint). The user pushes; no PR was opened by the agent.
 - The `ui-design-audit` branch/worktree was removed; all changes were copied into the original directory.
 - Dev DB seeded additively: one demo user per role and 30 generic tickets with no comments; the pre-existing tickets/comments were preserved.
-- Verification passed: `pytest` (40 tests), `npm run lint && npm run build`, and an API smoke check on the seeded DB.
+- Task 4 done: deprecated `datetime.utcnow()` replaced with timezone-aware UTC and the short test JWT secret replaced.
+- Verification passed: `pytest` (40 tests, no warnings), `npm run lint && npm run build`, and API smoke checks on the seeded DB.
 
 ## Aprendizajes y errores a evitar
 
 - Attached files can be empty: verify with `read`/`wc -c` before relying on them.
 - `create_all()` does not update an existing schema; use migrations or `flask db stamp head` first.
 - A worktree has no `node_modules`; never commit the local symlink used to share them.
-- The JWT test secret is too short and `datetime.utcnow()` is deprecated; both are known warnings, not regressions.
+- `utc_now()` is a callable helper, not a value evaluated at import; using `datetime.now(UTC)` directly as a column default would freeze the timestamp.
 
 ## Decisiones (y por qué)
 
@@ -25,6 +26,7 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - Filters, pagination and the new-ticket dialog live in URL search params to support deep links and back/forward navigation.
 - IBM Plex Sans/Mono is loaded from Google Fonts with `preconnect`; no npm dependency was added.
 - The assignee selector is limited to admin/agent and cannot clear an assignment: the backend schema rejects `null` and the service ignores falsy `assignee_id`. Ask before changing that contract.
+- Existing rows keep naive timestamps; new rows are aware UTC. No migration was needed because column types did not change.
 
 ## Próximos pasos
 

@@ -1,4 +1,4 @@
-"""Configuración de la aplicación por entorno."""
+"""Configuration for each application environment."""
 
 import os
 from datetime import timedelta
@@ -9,7 +9,7 @@ load_dotenv()
 
 
 def _env_bool(name: str, default: bool = False) -> bool:
-    """Lee una variable de entorno booleana."""
+    """Read a boolean environment variable."""
     value = os.environ.get(name)
     if value is None:
         return default
@@ -17,7 +17,7 @@ def _env_bool(name: str, default: bool = False) -> bool:
 
 
 class BaseConfig:
-    """Configuración común a todos los entornos."""
+    """Settings shared by every environment."""
 
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///helpdesk.db")
@@ -35,7 +35,7 @@ class BaseConfig:
 
 
 class DevelopmentConfig(BaseConfig):
-    """Configuración para desarrollo local."""
+    """Settings for local development."""
 
     DEBUG = True
     CREATE_TABLES = True
@@ -43,17 +43,17 @@ class DevelopmentConfig(BaseConfig):
 
 
 class TestingConfig(BaseConfig):
-    """Configuración aislada para la suite de tests."""
+    """Isolated settings for the test suite."""
 
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    JWT_SECRET_KEY = "test-jwt-secret"
+    JWT_SECRET_KEY = "test-jwt-secret-32chars-long-key"
     CREATE_TABLES = True
     LOG_LEVEL = "WARNING"
 
 
 class ProductionConfig(BaseConfig):
-    """Configuración para producción."""
+    """Settings for production."""
 
     CREATE_TABLES = False
     LOG_JSON = _env_bool("LOG_JSON", True)
@@ -71,11 +71,11 @@ CONFIGS: dict[str, type[BaseConfig]] = {
 
 
 def get_config(env: str | None = None) -> type[BaseConfig]:
-    """Devuelve la clase de configuración correspondiente al entorno.
+    """Return the configuration class for the given environment.
 
     Args:
-        env: Nombre del entorno. Si no se indica, se usa ``FLASK_ENV`` o
-            ``APP_ENV`` y, como último recurso, ``development``.
+        env: Environment name. Falls back to ``FLASK_ENV`` or ``APP_ENV``
+            and finally to ``development``.
     """
     name = (
         env
