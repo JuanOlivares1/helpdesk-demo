@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getApiError, getFieldErrors, ticketApi } from "../api";
 import { PRIORITY_OPTIONS } from "../ticket-meta";
 import type { TicketPriority } from "../types";
@@ -38,15 +38,16 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
           ? "Check the highlighted fields."
           : getApiError(err, "Ticket creation failed"),
       );
-      requestAnimationFrame(() => {
-        formRef.current
-          ?.querySelector<HTMLElement>('[aria-invalid="true"]')
-          ?.focus();
-      });
     } finally {
       setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    formRef.current
+      ?.querySelector<HTMLElement>('[aria-invalid="true"]')
+      ?.focus();
+  }, [fieldErrors]);
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} noValidate={false}>

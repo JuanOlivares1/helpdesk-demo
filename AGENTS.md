@@ -46,13 +46,15 @@ flask --app app db migrate -m "describe the change"
 flask --app app db downgrade
 ```
 
-Frontend (no test runner; verification is lint + build):
+Frontend (Playwright E2E covers desktop and mobile; verification is lint + build + E2E):
 
 ```bash
 cd frontend
 npm run dev
 npm run lint
 npm run build
+npx playwright install --with-deps chromium   # one-time browser setup
+npm run test:e2e
 ```
 
 Docker:
@@ -108,6 +110,7 @@ docker compose up --build
 Cómo comprobar que un cambio funciona antes de darlo por terminado:
 
 - Backend: `pytest`; when models change, also apply `cd backend && flask --app app db upgrade` against a disposable database.
-- Frontend: `cd frontend && npm run lint && npm run build` (there is no frontend test runner).
-- Full stack: start the API and `npm run dev`, then check `/health`, login, ticket list/detail, a mobile viewport and keyboard focus order.
+- Frontend: `cd frontend && npm run lint && npm run build && npm run test:e2e` (E2E needs Chromium installed once with `npx playwright install --with-deps chromium`).
+- Full stack: the E2E suite already checks `/health` indirectly plus login, list/detail, triage, comments, mobile viewport and keyboard focus; the HTTP smoke check is still useful for API-only changes.
+- Playwright uses a disposable database copy and isolated ports 5001/5174; never point it at the development database or stop the user's servers on 5000/5173.
 - Manual only: no CI workflows or pre-commit hooks exist yet.

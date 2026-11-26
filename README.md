@@ -48,6 +48,12 @@ npm run dev
 
 El cliente HTTP usa `VITE_API_URL` (por defecto `http://localhost:5000/api`).
 
+Para instalar el navegador de las pruebas E2E (requiere permisos de administrador para las bibliotecas del sistema):
+
+```bash
+npx playwright install --with-deps chromium
+```
+
 ## Docker Compose
 
 ```bash
@@ -95,6 +101,7 @@ pytest --cov=app --cov-report=term-missing
 cd frontend
 npm run lint
 npm run build
+npm run test:e2e
 ```
 
-Actualmente pasan **36 tests** con ~97 % de cobertura en el backend. El frontend no tiene runner de tests; su verificación es lint + build.
+Actualmente pasan **40 tests** con ~97 % de cobertura en el backend. El frontend tiene una suite E2E con Playwright (22 pruebas: escritorio y móvil) que usa una copia desechable de la base de desarrollo y levanta sus propios servidores en los puertos 5001 y 5174; no modifica la base ni los servidores locales. La verificación del frontend es lint + build + E2E.

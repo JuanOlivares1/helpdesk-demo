@@ -32,6 +32,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Playwright
+frontend/playwright-report/
+frontend/test-results/
+frontend/blob-report/
+
 # Local tooling
 .opencode/
 

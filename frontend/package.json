@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pretest:e2e": "node e2e/prepare-db.mjs",
+    "test:e2e": "playwright test",
+    "pretest:e2e:ui": "node e2e/prepare-db.mjs",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "axios": "^1.21.1",
@@ -17,6 +21,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/vite": "^4.3.5",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",

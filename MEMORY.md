@@ -11,8 +11,9 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - The `ui-design-audit` branch/worktree was removed; all changes were copied into the original directory.
 - Dev DB seeded additively: one demo user per role and 30 generic tickets with no comments; the pre-existing tickets/comments were preserved.
 - Task 4 done: deprecated `datetime.utcnow()` replaced with timezone-aware UTC and the short test JWT secret replaced.
-- Task 5 done: full-stack HTTP check (`/health`, login, list/detail/comments, assignees, 401/403/422, assignee patch) plus static mobile/focus/motion review.
-- Verification passed: `pytest` (40 tests, no warnings), `npm run lint && npm run build`, and Vite module transforms. No browser automation is available, so visual mobile/focus testing is still manual.
+- Task 5 done: full-stack HTTP check (`/health`, login, list/detail/comments, assignees, 401/403/422, assignee patch).
+- Task 6 done: Playwright E2E suite (22 tests: desktop + mobile) with a disposable DB copy and isolated ports 5001/5174; `npm run lint && npm run build && npm run test:e2e` passed.
+- The E2E run exposed a focus race in `TicketForm`: `requestAnimationFrame` could fire before `aria-invalid` was rendered; it now focuses the first invalid field in a `useEffect` keyed to `fieldErrors`.
 
 ## Aprendizajes y errores a evitar
 
@@ -21,6 +22,7 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - A worktree has no `node_modules`; never commit the local symlink used to share them.
 - `utc_now()` is a callable helper, not a value evaluated at import; using `datetime.now(UTC)` directly as a column default would freeze the timestamp.
 - Ports 5000 and 5173 are usually occupied by the user's own dev servers; use 5001/5174 for isolated checks and stop only the processes you started.
+- `sudo npx` fails (`npx: command not found`); install Playwright system deps with `npx playwright install --with-deps chromium` (with a password prompt) or `sudo apt-get install libnspr4 libnss3 libasound2t64`.
 
 ## Decisiones (y por qué)
 
@@ -38,7 +40,7 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 
 Backlog from the previous session:
 
-- Add frontend tests (for example, Vitest + Testing Library).
+- If more coverage is needed, add Vitest + Testing Library for component-level tests.
 - Test `docker-compose.yml` in an environment with Docker.
 - Review the unused `bcrypt` dependency in `requirements.txt`.
 - Add CI for tests, lint and build.
