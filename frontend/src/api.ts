@@ -8,6 +8,8 @@ import type {
   TicketStatus,
   TicketUpdatePayload,
   User,
+  UserCreatePayload,
+  UserRoleUpdatePayload,
 } from "./types";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -135,6 +137,15 @@ interface AssigneesResponse {
   assignees: Assignee[];
 }
 
+interface UsersResponse {
+  users: User[];
+}
+
+interface UserMutationResponse {
+  message: string;
+  user: User;
+}
+
 export const authApi = {
   register: (email: string, password: string) =>
     api.post<RegisterResponse>("/auth/register", { email, password }),
@@ -147,6 +158,11 @@ export const authApi = {
 
 export const usersApi = {
   listAssignees: () => api.get<AssigneesResponse>("/users/assignees"),
+  list: () => api.get<UsersResponse>("/users/"),
+  create: (data: UserCreatePayload) =>
+    api.post<UserMutationResponse>("/users/", data),
+  updateRole: (id: number, data: UserRoleUpdatePayload) =>
+    api.patch<UserMutationResponse>(`/users/${id}`, data),
 };
 
 export const ticketApi = {

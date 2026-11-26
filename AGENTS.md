@@ -14,7 +14,7 @@ Multi-user ticket helpdesk for clients and support teams. The backend is Flask +
 - `backend/migrations/`: Flask-Migrate; initial revision `ea26a6ef442b`. `backend/instance/helpdesk.db` is the ignored development database.
 - `frontend/src/api.ts`: typed axios client, base `VITE_API_URL` (default `http://localhost:5000/api`), token in `localStorage` as `token`, 401 redirect except on login/register.
 - `frontend/src/auth/`: `AuthProvider` validates the token with `/auth/me`; `useAuth` exposes `user`, `token`, `loading`, `login`, `logout`, `refreshUser`.
-- `frontend/src/App.tsx`: `/login`, `/register`, `/`, `/ticket/:id` and a 404 route; `PrivateRoute`/`PublicOnlyRoute` wait for `loading`.
+- `frontend/src/App.tsx`: `/login`, `/register`, `/`, `/ticket/:id`, `/users` (admins only) and a 404 route; `PrivateRoute`/`PublicOnlyRoute`/`AdminRoute` wait for `loading`.
 - `frontend/src/types.ts`: API types. `frontend/src/ticket-meta.ts`: status/priority labels and badge classes. `frontend/src/index.css`: Tailwind v4 semantic component classes and theme tokens.
 - `docker-compose.yml`: PostgreSQL 16 plus backend with Gunicorn; runs `flask db upgrade` before starting. The frontend runs separately with `npm run dev`.
 
@@ -112,6 +112,6 @@ Cómo comprobar que un cambio funciona antes de darlo por terminado:
 
 - Backend: `pytest`; when models change, also apply `cd backend && flask --app app db upgrade` against a disposable database.
 - Frontend: `cd frontend && npm run lint && npm run build && npm run test:e2e` (E2E needs Chromium installed once with `npx playwright install --with-deps chromium`).
-- Full stack: the E2E suite already checks `/health` indirectly plus login, list/detail, triage, comments, mobile viewport and keyboard focus; the HTTP smoke check is still useful for API-only changes.
+- Full stack: the E2E suite already checks `/health` indirectly plus login, list/detail, triage, comments, user creation/role changes, mobile viewport and keyboard focus; the HTTP smoke check is still useful for API-only changes.
 - Playwright uses a disposable database copy and isolated ports 5001/5174; never point it at the development database or stop the user's servers on 5000/5173.
 - Manual only: no CI workflows or pre-commit hooks exist yet.

@@ -37,6 +37,14 @@ export default function Navbar() {
               Tickets
             </Link>
           )}
+          {token && user?.role === "admin" && (
+            <Link
+              to="/users"
+              className="rounded-sm text-sm text-white/70 hover:text-white focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+            >
+              Users
+            </Link>
+          )}
         </div>
 
         <div className="flex shrink-0 items-center gap-3">

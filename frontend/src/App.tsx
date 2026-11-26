@@ -6,6 +6,7 @@ import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import TicketList from "./components/TicketList";
 import TicketDetail from "./components/TicketDetail";
+import UserAdmin from "./components/UserAdmin";
 import NotFound from "./components/NotFound";
 
 function LoadingScreen() {
@@ -36,6 +37,20 @@ function PublicOnlyRoute({ children }: { children: ReactNode }) {
   }
 
   return token ? <Navigate to="/" replace /> : children;
+}
+
+function AdminRoute({ children }: { children: ReactNode }) {
+  const { token, user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return user?.role === "admin" ? children : <Navigate to="/" replace />;
 }
 
 export default function App() {
@@ -76,6 +91,14 @@ export default function App() {
             <PrivateRoute>
               <TicketDetail />
             </PrivateRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <AdminRoute>
+              <UserAdmin />
+            </AdminRoute>
           }
         />
         <Route path="*" element={<NotFound />} />

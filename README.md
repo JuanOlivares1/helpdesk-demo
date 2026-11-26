@@ -9,7 +9,7 @@ Sistema multiusuario de tickets con backend **Flask + SQLAlchemy + JWT** y front
 - Roles `admin`, `agent` y `client` con permisos diferenciados.
 - Tickets con estado, prioridad, filtros y paginación.
 - Comentarios por ticket.
-- Frontend SPA con contexto de autenticación, errores de validación y ruta 404.
+- Frontend SPA con contexto de autenticación, errores de validación, directorio de usuarios para admins y ruta 404.
 - Migraciones con Flask-Migrate y despliegue con Docker Compose + PostgreSQL + Gunicorn.
 
 ## Estructura
@@ -108,6 +108,6 @@ npm run build
 npm run test:e2e
 ```
 
-Actualmente pasan **56 tests** en el backend. El frontend tiene una suite E2E con Playwright (24 pruebas: escritorio y móvil) que usa una copia desechable de la base de desarrollo y levanta sus propios servidores en los puertos 5001 y 5174; no modifica la base ni los servidores locales. La verificación del frontend es lint + build + E2E.
+Actualmente pasan **56 tests** en el backend. El frontend tiene una suite E2E con Playwright (34 pruebas: escritorio y móvil) que usa una copia desechable de la base de desarrollo y levanta sus propios servidores en los puertos 5001 y 5174; no modifica la base ni los servidores locales. La verificación del frontend es lint + build + E2E.
 
 Las fechas de la API se serializan siempre como ISO 8601 en UTC (`+00:00`). Los valores antiguos sin zona se interpretan como UTC; la migración `c4f1a9b2d7e3` actualiza las filas existentes y las columnas pasan a `DateTime(timezone=True)`.

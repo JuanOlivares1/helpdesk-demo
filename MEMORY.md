@@ -11,10 +11,11 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - Dev DB seeded additively: one demo user per role and 30 generic tickets with no comments; the pre-existing tickets/comments were preserved.
 - Task 4 done: deprecated `datetime.utcnow()` replaced with timezone-aware UTC and the short test JWT secret replaced.
 - Task 5 done: full-stack HTTP check (`/health`, login, list/detail/comments, assignees, 401/403/422, assignee patch).
-- Task 6 done: Playwright E2E suite (22 tests at the time; now 24) with a disposable DB copy and isolated ports 5001/5174; `npm run lint && npm run build && npm run test:e2e` passed; fixed a `TicketForm` focus race.
+- Task 6 done: Playwright E2E suite with a disposable DB copy and isolated ports 5001/5174; fixed a `TicketForm` focus race.
 - Task 7 done: UTC timestamp normalization via `iso_utc()` plus migration `c4f1a9b2d7e3` (aware columns and legacy rows interpreted as UTC); dev DB stamped and upgraded with a backup in `/tmp/opencode/helpdesk-before-utc-migration.db`.
 - Project-local chrome-devtools MCP verified via `opencode run --standalone`: `chrome-devtools-mcp@latest --headless=true` uses Ubuntu Chrome; Windows Chrome over WSL cannot expose CDP. Restart OpenCode if MCP tools vanish after config edits.
 - Task 8 done: admin-only user management (`GET/POST /api/users`, `PATCH /api/users/<id>`) with role validation, duplicate check, self-demotion guard, and 12 new tests (56 total).
+- Task 9 done: admin-only `/users` UI (`UserAdmin`, `NewUserDialog`) with inline role changes, self row locked, `AdminRoute`, navbar link and 5 new E2E tests (34 total).
 
 ## Aprendizajes y errores a evitar
 

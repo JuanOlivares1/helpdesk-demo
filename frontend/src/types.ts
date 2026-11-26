@@ -11,6 +11,16 @@ export interface User {
 
 export type Assignee = Pick<User, "id" | "email" | "role">;
 
+export interface UserCreatePayload {
+  email: string;
+  password: string;
+  role: Role;
+}
+
+export interface UserRoleUpdatePayload {
+  role: Role;
+}
+
 export interface Ticket {
   id: number;
   title: string;
