@@ -19,7 +19,7 @@ export default function Pagination({ page, pages, status }: PaginationProps) {
 
   const disabledClass = "cursor-not-allowed text-ink/35";
   const linkClass =
-    "rounded-md border border-line px-3 py-1.5 text-xs font-medium text-ink hover:bg-paper focus-visible:ring-2 focus-visible:ring-signal";
+    "rounded-md border border-line px-3 py-1.5 text-xs font-medium text-ink hover:bg-paper focus-visible:ring-2 focus-visible:ring-accent";
 
   return (
     <nav
@@ -36,7 +36,7 @@ export default function Pagination({ page, pages, status }: PaginationProps) {
         </span>
       )}
 
-      <span aria-live="polite" className="font-mono text-xs text-ink/60">
+      <span aria-live="polite" className="font-mono text-xs text-muted">
         Page {page} of {pages}
       </span>
 

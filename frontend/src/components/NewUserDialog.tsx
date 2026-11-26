@@ -94,7 +94,7 @@ export default function NewUserDialog({
           <h2 id="new-user-title" className="text-lg font-semibold text-ink">
             New user
           </h2>
-          <p className="mt-1 text-sm text-ink/60">
+          <p className="mt-1 text-sm text-muted">
             Add an account and choose its access level.
           </p>
         </div>
@@ -190,7 +190,7 @@ export default function NewUserDialog({
             {submitting && (
               <span
                 aria-hidden="true"
-                className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:hidden"
+                className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-transparent border-t-current motion-reduce:hidden"
               />
             )}
             {submitting ? "Creating user…" : "Create user"}

@@ -27,7 +27,7 @@ export default function Field({ label, hint, error, children }: FieldProps) {
       </label>
       {children({ id, invalid: Boolean(error), describedBy })}
       {hint && (
-        <p id={hintId} className="mt-1 text-xs text-ink/55">
+        <p id={hintId} className="mt-1 text-xs text-muted">
           {hint}
         </p>
       )}

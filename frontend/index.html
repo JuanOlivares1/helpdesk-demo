@@ -4,7 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f6f8f7" />
+    <meta name="theme-color" id="theme-color" content="#f6f8f7" />
+    <script>
+      // Apply the saved theme before painting so the first frame is correct.
+      (() => {
+        try {
+          const choice = localStorage.getItem("theme");
+          const dark =
+            choice === "dark" ||
+            (choice !== "light" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.classList.toggle("dark", dark);
+          document
+            .getElementById("theme-color")
+            ?.setAttribute("content", dark ? "#0e1518" : "#f6f8f7");
+        } catch {
+          // Storage can be unavailable; the CSS default remains light.
+        }
+      })();
+    </script>
     <meta
       name="description"
       content="Track, triage, and resolve support requests in one place."

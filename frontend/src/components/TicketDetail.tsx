@@ -201,7 +201,7 @@ export default function TicketDetail() {
   if (!ticket) {
     return (
       <main id="main" className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
-        <p role="status" aria-live="polite" className="text-sm text-ink/60">
+        <p role="status" aria-live="polite" className="text-sm text-muted">
           Loading ticket…
         </p>
       </main>
@@ -218,14 +218,14 @@ export default function TicketDetail() {
     <main id="main" className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <Link
         to="/"
-        className="inline-flex rounded-sm text-sm text-ink/60 hover:text-signal focus-visible:ring-2 focus-visible:ring-signal"
+        className="inline-flex rounded-sm text-sm text-muted hover:text-accent-ink focus-visible:ring-2 focus-visible:ring-accent"
       >
         ← Back to tickets
       </Link>
 
       <header className="mt-4 flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="font-mono text-xs text-ink/50">
+          <p className="font-mono text-xs text-muted">
             Ticket #{ticket.id}
           </p>
           <h1 className="mt-1 text-3xl font-semibold text-ink break-words">
@@ -240,7 +240,7 @@ export default function TicketDetail() {
             </span>
           </div>
         </div>
-        <p className="font-mono text-xs text-ink/50 tabular-nums">
+        <p className="font-mono text-xs text-muted tabular-nums">
           Opened {formatDateTime(ticket.created_at)}
         </p>
       </header>
@@ -262,7 +262,7 @@ export default function TicketDetail() {
             </h2>
 
             {comments.length === 0 ? (
-              <p className="mt-4 text-sm text-ink/60">
+              <p className="mt-4 text-sm text-muted">
                 No comments yet. Add the first update below.
               </p>
             ) : (
@@ -275,7 +275,7 @@ export default function TicketDetail() {
                     <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink/85 break-words">
                       {comment.body}
                     </p>
-                    <p className="mt-2 font-mono text-[11px] text-ink/50 tabular-nums">
+                    <p className="mt-2 font-mono text-[11px] text-muted tabular-nums">
                       User #{comment.author_id} ·{" "}
                       {formatDateTime(comment.created_at)}
                     </p>
@@ -428,7 +428,7 @@ export default function TicketDetail() {
               ) : (
                 <div>
                   <span className="label">Assignee</span>
-                  <p className="text-sm text-ink/70">
+                  <p className="text-sm text-muted">
                     {ticket.assignee_id
                       ? `User #${ticket.assignee_id}`
                       : "Unassigned"}
@@ -454,7 +454,7 @@ export default function TicketDetail() {
                 {updating && (
                   <span
                     aria-hidden="true"
-                    className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:hidden"
+                    className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-transparent border-t-current motion-reduce:hidden"
                   />
                 )}
                 {updating ? "Saving changes…" : "Save changes"}

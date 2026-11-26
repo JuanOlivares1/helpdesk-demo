@@ -18,10 +18,10 @@ export default function StatusRail({ status }: { status: TicketStatus }) {
               aria-hidden="true"
               className={`grid h-6 w-6 place-items-center rounded-full font-mono text-[11px] font-semibold ${
                 active
-                  ? "bg-signal text-white"
+                  ? "bg-accent text-on-accent"
                   : done
-                    ? "bg-signal/15 text-signal"
-                    : "bg-ink/5 text-ink/40"
+                    ? "bg-success/15 text-success"
+                    : "bg-ink/5 text-faint"
               }`}
             >
               {index + 1}
@@ -29,7 +29,7 @@ export default function StatusRail({ status }: { status: TicketStatus }) {
             <span
               aria-current={active ? "step" : undefined}
               className={`text-xs ${
-                active ? "font-semibold text-ink" : "text-ink/55"
+                active ? "font-semibold text-ink" : "text-faint"
               }`}
             >
               {STATUS_LABELS[step]}

@@ -16,9 +16,9 @@ const ROLE_LABELS: Record<Role, string> = {
 };
 
 const ROLE_BADGE_CLASS: Record<Role, string> = {
-  admin: "bg-signal/10 text-signal ring-signal/20",
+  admin: "bg-accent/10 text-accent-ink ring-accent/20",
   agent: "bg-warning/10 text-warning ring-warning/20",
-  client: "bg-ink/5 text-ink/70 ring-line",
+  client: "bg-ink/5 text-muted ring-line",
 };
 
 export default function UserAdmin() {
@@ -146,7 +146,7 @@ export default function UserAdmin() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-ink">Users</h1>
-          <p className="mt-1 text-sm text-ink/60">
+          <p className="mt-1 text-sm text-muted">
             {users.length} accounts. {elevatedCount} with elevated access.
           </p>
         </div>
@@ -165,14 +165,14 @@ export default function UserAdmin() {
         <div
           role="status"
           aria-live="polite"
-          className="panel mt-5 px-6 py-14 text-center text-sm text-ink/60"
+          className="panel mt-5 px-6 py-14 text-center text-sm text-muted"
         >
           Loading users…
         </div>
       ) : users.length === 0 ? (
         <div className="panel mt-5 flex flex-col items-center gap-3 px-6 py-14 text-center">
           <h2 className="text-lg font-semibold text-ink">No users yet</h2>
-          <p className="max-w-sm text-sm leading-relaxed text-ink/60">
+          <p className="max-w-sm text-sm leading-relaxed text-muted">
             Add an account to give someone access to this helpdesk.
           </p>
           <button
@@ -207,14 +207,14 @@ export default function UserAdmin() {
                     <tr key={user.id}>
                       <td className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-mono text-xs tabular-nums text-ink/50">
+                          <span className="font-mono text-xs tabular-nums text-muted">
                             #{user.id}
                           </span>
                           <span className="truncate font-medium text-ink">
                             {user.email}
                           </span>
                           {isSelf && (
-                            <span className="badge bg-signal/10 text-signal ring-signal/20">
+                            <span className="badge bg-accent/10 text-accent-ink ring-accent/20">
                               You
                             </span>
                           )}
@@ -257,13 +257,13 @@ export default function UserAdmin() {
                         {rowSuccess && (
                           <p
                             aria-live="polite"
-                            className="mt-1 text-xs font-medium text-signal"
+                            className="mt-1 text-xs font-medium text-success"
                           >
                             {rowSuccess}
                           </p>
                         )}
                       </td>
-                      <td className="whitespace-nowrap font-mono text-xs tabular-nums text-ink/60">
+                      <td className="whitespace-nowrap font-mono text-xs tabular-nums text-muted">
                         {formatDate(user.created_at)}
                       </td>
                       <td className="whitespace-nowrap">

@@ -132,7 +132,7 @@ export default function TicketForm({ onSuccess }: TicketFormProps) {
           {submitting && (
             <span
               aria-hidden="true"
-              className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:hidden"
+              className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-transparent border-t-current motion-reduce:hidden"
             />
           )}
           {submitting ? "Creating ticket…" : "Create ticket"}

@@ -12,7 +12,7 @@ import NotFound from "./components/NotFound";
 function LoadingScreen() {
   return (
     <main id="main" className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-      <p role="status" aria-live="polite" className="text-sm text-ink/60">
+      <p role="status" aria-live="polite" className="text-sm text-muted">
         Loading…
       </p>
     </main>

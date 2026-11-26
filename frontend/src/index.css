@@ -1,21 +1,68 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
   --color-ink: #16232b;
   --color-paper: #f6f8f7;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f4;
   --color-line: #d7e0dd;
-  --color-signal: #0b6e62;
+  --color-header: #16232b;
+  --color-on-header: #f8faf9;
+
+  --color-accent: #7a1f2b;
+  --color-accent-strong: #611722;
+  --color-accent-soft: #f7edf0;
+  --color-accent-ink: #7a1f2b;
+  --color-on-accent: #fbfcfb;
+
+  --color-success: #0b6e62;
   --color-warning: #b54708;
   --color-critical: #b42318;
+  --color-on-critical: #ffffff;
+
+  /* Secondary text is a solid tone so it meets 4.5:1 on every surface. */
+  --color-muted: #5c656b;
+  --color-faint: #687075;
+  --color-auth-accent: #7a1f2b;
 }
 
 @layer base {
   html {
     color-scheme: light;
     scroll-behavior: smooth;
+  }
+
+  html.dark {
+    color-scheme: dark;
+
+    --color-ink: #e7ece9;
+    --color-paper: #0e1518;
+    --color-surface: #162024;
+    --color-surface-muted: #1b272b;
+    --color-line: #2d3a3f;
+    --color-header: #090d0f;
+    --color-on-header: #eef2f0;
+
+    --color-accent: #b0475f;
+    --color-accent-strong: #b85064;
+    --color-accent-soft: #2a171d;
+    --color-accent-ink: #e7a0ac;
+    --color-on-accent: #fff8fa;
+
+    --color-success: #5fd0bd;
+    --color-warning: #f2b26b;
+    --color-critical: #f08a7e;
+    --color-on-critical: #1a0e12;
+
+    --color-muted: #a8afae;
+    --color-faint: #899090;
+    /* A deeper wine keeps white text legible at reduced opacity. */
+    --color-auth-accent: #7a1f2b;
   }
 
   body {
@@ -40,12 +87,12 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-signal);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--color-signal) 22%, transparent);
+    background-color: color-mix(in oklab, var(--color-accent) 22%, transparent);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -57,11 +104,11 @@
 
 @layer components {
   .skip-link {
-    @apply sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white;
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-header focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-on-header;
   }
 
   .panel {
-    @apply rounded-lg border border-line bg-white;
+    @apply rounded-lg border border-line bg-surface;
   }
 
   .label {
@@ -69,7 +116,7 @@
   }
 
   .input {
-    @apply w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-ink/45 focus-visible:border-signal focus-visible:ring-2 focus-visible:ring-signal/20 motion-safe:transition-colors motion-safe:duration-150;
+    @apply w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-faint focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/20 motion-safe:transition-colors motion-safe:duration-150;
   }
 
   .btn {
@@ -77,19 +124,19 @@
   }
 
   .btn-primary {
-    @apply bg-signal text-white hover:bg-signal/90 focus-visible:ring-signal;
+    @apply bg-accent text-on-accent hover:bg-accent-strong focus-visible:ring-accent;
   }
 
   .btn-danger {
-    @apply bg-critical text-white hover:bg-critical/90 focus-visible:ring-critical;
+    @apply bg-critical text-on-critical hover:bg-critical/90 focus-visible:ring-critical;
   }
 
   .btn-secondary {
-    @apply border border-line bg-white text-ink hover:bg-paper focus-visible:ring-signal;
+    @apply border border-line bg-surface text-ink hover:bg-surface-muted focus-visible:ring-accent;
   }
 
   .btn-ghost {
-    @apply text-ink/70 hover:bg-ink/5 hover:text-ink focus-visible:ring-signal;
+    @apply text-muted hover:bg-ink/5 hover:text-ink focus-visible:ring-accent;
   }
 
   .btn-sm {
@@ -105,11 +152,11 @@
   }
 
   .alert-success {
-    @apply bg-signal/5 text-signal ring-signal/20;
+    @apply bg-success/10 text-success ring-success/25;
   }
 
   .alert-info {
-    @apply bg-paper text-ink/80 ring-line;
+    @apply bg-surface-muted text-ink/80 ring-line;
   }
 
   .badge {
@@ -121,7 +168,7 @@
   }
 
   .data-table th {
-    @apply border-b border-line px-4 py-3 text-left text-xs font-semibold text-ink/60;
+    @apply border-b border-line px-4 py-3 text-left text-xs font-semibold text-muted;
   }
 
   .data-table td {
@@ -129,7 +176,7 @@
   }
 
   .data-table tbody tr {
-    @apply motion-safe:transition-colors motion-safe:duration-150 hover:bg-paper focus-within:bg-paper;
+    @apply motion-safe:transition-colors motion-safe:duration-150 hover:bg-surface-muted focus-within:bg-surface-muted;
   }
 
   .auth-shell {
@@ -137,7 +184,7 @@
   }
 
   .auth-aside {
-    @apply hidden flex-col justify-between bg-signal p-10 text-white lg:flex;
+    @apply hidden flex-col justify-between bg-auth-accent p-10 text-on-accent lg:flex;
   }
 
   .auth-main {
@@ -145,16 +192,16 @@
   }
 
   .auth-card {
-    @apply w-full max-w-md rounded-xl border border-line bg-white p-6 shadow-sm;
+    @apply w-full max-w-md rounded-xl border border-line bg-surface p-6 shadow-sm;
   }
 
   .dialog {
-    @apply max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-xl border border-line bg-white p-6 shadow-xl;
+    @apply max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-xl border border-line bg-surface p-6 shadow-xl;
     overscroll-behavior: contain;
   }
 
   .dialog::backdrop {
-    background-color: rgb(22 35 43 / 0.45);
+    background-color: color-mix(in oklab, var(--color-header) 55%, transparent);
     overscroll-behavior: contain;
   }
 }

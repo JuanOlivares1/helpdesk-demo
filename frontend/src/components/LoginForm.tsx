@@ -50,26 +50,26 @@ export default function LoginForm() {
     <div className="auth-shell">
       <aside aria-label="About HelpDesk" className="auth-aside">
         <div>
-          <p className="font-mono text-xs text-white/70">HelpDesk / Support desk</p>
+          <p className="font-mono text-xs text-on-accent/70">HelpDesk / Support desk</p>
           <p className="mt-8 max-w-sm text-3xl font-semibold leading-tight text-balance">
             Support requests, tracked clearly.
           </p>
-          <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/75">
+          <p className="mt-4 max-w-sm text-sm leading-relaxed text-on-accent/75">
             Give every issue an owner, a status, and a history your team can
             trust.
           </p>
         </div>
-        <ul className="space-y-3 text-sm text-white/80">
+        <ul className="space-y-3 text-sm text-on-accent/80">
           <li className="flex items-center gap-3">
-            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-white/80" />
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-on-accent/80" />
             Open to closed, without guesswork
           </li>
           <li className="flex items-center gap-3">
-            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-white/80" />
+            <span aria-hidden="true" className="h-2 w-2 rounded-full bg-on-accent/80" />
             Priority and ownership stay visible
           </li>
         </ul>
-        <p className="font-mono text-xs text-white/50">
+        <p className="font-mono text-xs text-on-accent/70">
           © {new Date().getFullYear()} HelpDesk
         </p>
       </aside>
@@ -77,7 +77,7 @@ export default function LoginForm() {
       <main id="main" className="auth-main">
         <form ref={formRef} onSubmit={handleSubmit} className="auth-card">
           <h1 className="text-2xl font-semibold text-ink">Sign in</h1>
-          <p className="mt-1 text-sm text-ink/60">Welcome back. Enter your details.</p>
+          <p className="mt-1 text-sm text-muted">Welcome back. Enter your details.</p>
 
           {registered && !error && (
             <Alert tone="success" className="mt-5">
@@ -136,17 +136,17 @@ export default function LoginForm() {
             {submitting && (
               <span
                 aria-hidden="true"
-                className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white motion-reduce:hidden"
+                className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-transparent border-t-current motion-reduce:hidden"
               />
             )}
             {submitting ? "Signing in…" : "Sign in"}
           </button>
 
-          <p className="mt-5 text-center text-sm text-ink/60">
+          <p className="mt-5 text-center text-sm text-muted">
             New here?{" "}
             <Link
               to="/register"
-              className="rounded-sm font-medium text-signal hover:underline focus-visible:ring-2 focus-visible:ring-signal"
+              className="rounded-sm font-medium text-accent-ink hover:underline focus-visible:ring-2 focus-visible:ring-accent"
             >
               Create an account
             </Link>

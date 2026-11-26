@@ -109,7 +109,7 @@ export default function TicketList() {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-ink">Tickets</h1>
-          <p className="mt-1 text-sm text-ink/60">
+          <p className="mt-1 text-sm text-muted">
             {total} {total === 1 ? "request" : "requests"} in view
           </p>
         </div>
@@ -131,10 +131,10 @@ export default function TicketList() {
               key={option.value || "all"}
               to={hrefFor(option.value, 1)}
               aria-current={active ? "page" : undefined}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium focus-visible:ring-2 focus-visible:ring-signal ${
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium focus-visible:ring-2 focus-visible:ring-accent ${
                 active
-                  ? "border-signal bg-signal text-white"
-                  : "border-line bg-white text-ink/65 hover:border-signal/40 hover:text-ink"
+                  ? "border-accent bg-accent text-on-accent"
+                  : "border-line bg-surface text-muted hover:border-accent/40 hover:text-ink"
               }`}
             >
               {option.label}
@@ -153,13 +153,13 @@ export default function TicketList() {
         <div
           role="status"
           aria-live="polite"
-          className="panel mt-5 px-6 py-14 text-center text-sm text-ink/60"
+          className="panel mt-5 px-6 py-14 text-center text-sm text-muted"
         >
           Loading tickets…
         </div>
       ) : tickets.length === 0 ? (
         <div className="panel mt-5 flex flex-col items-center gap-3 px-6 py-14 text-center">
-          <p className="font-mono text-xs font-semibold text-ink/45">
+          <p className="font-mono text-xs font-semibold text-faint">
             No matches
           </p>
           <h2 className="text-lg font-semibold text-ink">
@@ -167,7 +167,7 @@ export default function TicketList() {
               ? `No ${STATUS_LABELS[statusFilter].toLowerCase()} tickets`
               : "No tickets yet"}
           </h2>
-          <p className="max-w-sm text-sm leading-relaxed text-ink/60">
+          <p className="max-w-sm text-sm leading-relaxed text-muted">
             {statusFilter
               ? "Try another status to see more requests."
               : "Create the first ticket to start tracking requests."}
@@ -195,13 +195,13 @@ export default function TicketList() {
               <tbody>
                 {tickets.map((ticket) => (
                   <tr key={ticket.id}>
-                    <td className="font-mono text-xs tabular-nums text-ink/50">
+                    <td className="font-mono text-xs tabular-nums text-muted">
                       {ticket.id}
                     </td>
                     <td className="min-w-0 max-w-xs">
                       <Link
                         to={`/ticket/${ticket.id}`}
-                        className="block truncate rounded-sm font-medium text-ink hover:text-signal focus-visible:ring-2 focus-visible:ring-signal"
+                        className="block truncate rounded-sm font-medium text-ink hover:text-accent-ink focus-visible:ring-2 focus-visible:ring-accent"
                       >
                         {ticket.title}
                       </Link>
@@ -220,7 +220,7 @@ export default function TicketList() {
                         {PRIORITY_LABELS[ticket.priority]}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap font-mono text-xs tabular-nums text-ink/60">
+                    <td className="whitespace-nowrap font-mono text-xs tabular-nums text-muted">
                       {formatDate(ticket.created_at)}
                     </td>
                   </tr>

@@ -47,7 +47,7 @@ export default function NewTicketDialog({
           <h2 id="new-ticket-title" className="text-lg font-semibold text-ink">
             New ticket
           </h2>
-          <p className="mt-1 text-sm text-ink/60">
+          <p className="mt-1 text-sm text-muted">
             Tell us what needs attention.
           </p>
         </div>
