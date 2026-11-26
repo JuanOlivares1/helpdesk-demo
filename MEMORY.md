@@ -11,7 +11,8 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - The `ui-design-audit` branch/worktree was removed; all changes were copied into the original directory.
 - Dev DB seeded additively: one demo user per role and 30 generic tickets with no comments; the pre-existing tickets/comments were preserved.
 - Task 4 done: deprecated `datetime.utcnow()` replaced with timezone-aware UTC and the short test JWT secret replaced.
-- Verification passed: `pytest` (40 tests, no warnings), `npm run lint && npm run build`, and API smoke checks on the seeded DB.
+- Task 5 done: full-stack HTTP check (`/health`, login, list/detail/comments, assignees, 401/403/422, assignee patch) plus static mobile/focus/motion review.
+- Verification passed: `pytest` (40 tests, no warnings), `npm run lint && npm run build`, and Vite module transforms. No browser automation is available, so visual mobile/focus testing is still manual.
 
 ## Aprendizajes y errores a evitar
 
@@ -19,6 +20,7 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - `create_all()` does not update an existing schema; use migrations or `flask db stamp head` first.
 - A worktree has no `node_modules`; never commit the local symlink used to share them.
 - `utc_now()` is a callable helper, not a value evaluated at import; using `datetime.now(UTC)` directly as a column default would freeze the timestamp.
+- Ports 5000 and 5173 are usually occupied by the user's own dev servers; use 5001/5174 for isolated checks and stop only the processes you started.
 
 ## Decisiones (y por qué)
 
@@ -31,13 +33,11 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 ## Próximos pasos
 
 1. User pushes the commits and opens the PR if needed; address review feedback only after that.
-2. Full-stack manual check: `/health`, login, ticket list/detail, assignee change, mobile viewport and keyboard focus order.
+2. Normalize mixed timestamp formats in the API (legacy naive rows vs new aware UTC); requires a data migration decision.
 3. If requested, add unassign support or an admin endpoint to create/promote admin/agent users.
 
 Backlog from the previous session:
 
-- Replace `datetime.utcnow()` with `datetime.now(UTC)` in models and service.
-- Lengthen the JWT secret used by the legacy test.
 - Add frontend tests (for example, Vitest + Testing Library).
 - Test `docker-compose.yml` in an environment with Docker.
 - Review the unused `bcrypt` dependency in `requirements.txt`.
