@@ -10,6 +10,15 @@ def utc_now() -> datetime:
     return datetime.now(UTC)
 
 
+def iso_utc(value: datetime | None) -> str | None:
+    """Serialize a datetime as UTC ISO 8601, treating naive values as UTC."""
+    if value is None:
+        return None
+    if value.tzinfo is None or value.utcoffset() is None:
+        return value.replace(tzinfo=UTC).isoformat()
+    return value.astimezone(UTC).isoformat()
+
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -17,7 +26,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='client')
-    created_at = db.Column(db.DateTime, default=utc_now)
+    created_at = db.Column(db.DateTime(timezone=True), default=utc_now)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -30,7 +39,7 @@ class User(db.Model):
             'id': self.id,
             'email': self.email,
             'role': self.role,
-            'created_at': self.created_at.isoformat()
+            'created_at': iso_utc(self.created_at)
         }
 
 
@@ -44,8 +53,8 @@ class Ticket(db.Model):
     priority = db.Column(db.String(10), default='medium')
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     assignee_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-    created_at = db.Column(db.DateTime, default=utc_now)
-    updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now)
+    created_at = db.Column(db.DateTime(timezone=True), default=utc_now)
+    updated_at = db.Column(db.DateTime(timezone=True), default=utc_now, onupdate=utc_now)
 
     author = db.relationship('User', foreign_keys=[user_id])
     assignee = db.relationship('User', foreign_keys=[assignee_id])
@@ -60,7 +69,7 @@ class Ticket(db.Model):
             'priority': self.priority,
             'user_id': self.user_id,
             'assignee_id': self.assignee_id,
-            'created_at': self.created_at.isoformat()
+            'created_at': iso_utc(self.created_at)
         }
 
 
@@ -71,7 +80,7 @@ class Comment(db.Model):
     body = db.Column(db.Text, nullable=False)
     ticket_id = db.Column(db.Integer, db.ForeignKey('tickets.id'), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=utc_now)
+    created_at = db.Column(db.DateTime(timezone=True), default=utc_now)
 
     author = db.relationship('User', foreign_keys=[author_id])
 
@@ -81,5 +90,5 @@ class Comment(db.Model):
             'body': self.body,
             'ticket_id': self.ticket_id,
             'author_id': self.author_id,
-            'created_at': self.created_at.isoformat()
+            'created_at': iso_utc(self.created_at)
         }

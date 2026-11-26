@@ -104,4 +104,6 @@ npm run build
 npm run test:e2e
 ```
 
-Actualmente pasan **40 tests** con ~97 % de cobertura en el backend. El frontend tiene una suite E2E con Playwright (22 pruebas: escritorio y móvil) que usa una copia desechable de la base de desarrollo y levanta sus propios servidores en los puertos 5001 y 5174; no modifica la base ni los servidores locales. La verificación del frontend es lint + build + E2E.
+Actualmente pasan **44 tests** en el backend. El frontend tiene una suite E2E con Playwright (24 pruebas: escritorio y móvil) que usa una copia desechable de la base de desarrollo y levanta sus propios servidores en los puertos 5001 y 5174; no modifica la base ni los servidores locales. La verificación del frontend es lint + build + E2E.
+
+Las fechas de la API se serializan siempre como ISO 8601 en UTC (`+00:00`). Los valores antiguos sin zona se interpretan como UTC; la migración `c4f1a9b2d7e3` actualiza las filas existentes y las columnas pasan a `DateTime(timezone=True)`.

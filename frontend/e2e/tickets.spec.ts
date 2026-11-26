@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { signIn } from "./helpers";
+import { API_URL, signIn } from "./helpers";
 
 test("filters and paginates through the URL", async ({ page }) => {
   await signIn(page, "admin.demo@helpdesk.test");
@@ -92,4 +92,20 @@ test("fits the viewport without horizontal overflow", async ({ page }) => {
     () => document.documentElement.scrollWidth - window.innerWidth,
   );
   expect(overflow).toBeLessThanOrEqual(1);
+});
+
+test("exposes UTC timestamps through the API", async ({ page }) => {
+  await signIn(page, "admin.demo@helpdesk.test");
+
+  const token = await page.evaluate(() => localStorage.getItem("token"));
+  const response = await page.request.get(`${API_URL}/tickets/?per_page=3`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  expect(response.ok()).toBeTruthy();
+  const data = await response.json();
+  expect(data.tickets.length).toBeGreaterThan(0);
+  for (const ticket of data.tickets) {
+    expect(ticket.created_at).toMatch(/\+00:00$/);
+  }
 });
