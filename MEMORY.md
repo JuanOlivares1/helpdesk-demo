@@ -8,6 +8,7 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - Task 14 done: dark mode + deep-wine accent, three-state theme selector and AA contrast fixes across the SPA.
 - Task 15 done: in `/users`, a pending role change highlights Save with `.btn-ready` (wine border + 5% tint); the E2E asserts the enabled/disabled transition.
 - Task 16 done: centered modal dialogs with `m-auto` on `.dialog`; the ticket-dialog E2E checks the bounding box against the viewport center on desktop and mobile.
+- Task 17 done: all 9 dev-only npm advisories cleared; `npm audit fix` bumped eslint 10.15, typescript-eslint 8.74 and minimatch 11.0.9 inside existing ranges, so only `package-lock.json` changed.
 - Theme lives in `index.css`: semantic tokens overridden under `html.dark`, `@custom-variant dark (&:where(.dark, .dark *))`, pre-paint script in `index.html`, `theme-color` meta updated with the theme.
 - Selector in `Navbar.tsx` cycles system → light → dark, stores the choice in `localStorage.theme`, and follows `matchMedia` only while `system` is selected.
 - Palette: light accent `#7a1f2b`, dark accent `#b0475f`; auth aside uses `#7a1f2b` in both themes; `success` stays teal so state badges remain distinct from the accent.
@@ -45,5 +46,5 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 
 1. User reviews the light/dark screenshots and handles pushes/PRs; address feedback after that.
 2. If requested, review refresh tokens, rate limiting and a database check in `/health`.
-3. Backlog: CI for tests/lint/build, 9 dev-only npm advisories, `create_all()` vs full migrations.
+3. Backlog: CI for tests/lint/build and `create_all()` vs full migrations.
 4. Visual fidelity from the generated target remains unverified: no target image was produced and the inspecting model cannot view pixels.
