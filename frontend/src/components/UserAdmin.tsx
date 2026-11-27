@@ -202,6 +202,8 @@ export default function UserAdmin() {
                   const draft = roleDrafts[user.id] ?? user.role;
                   const rowError = rowErrors[user.id];
                   const rowSuccess = successMessages[user.id];
+                  const canSave =
+                    !isSelf && draft !== user.role && savingId !== user.id;
 
                   return (
                     <tr key={user.id}>
@@ -269,10 +271,8 @@ export default function UserAdmin() {
                       <td className="whitespace-nowrap">
                         <button
                           type="button"
-                          className="btn btn-secondary btn-sm"
-                          disabled={
-                            isSelf || draft === user.role || savingId === user.id
-                          }
+                          className={`btn btn-sm ${canSave ? "btn-ready" : "btn-secondary"}`}
+                          disabled={!canSave}
                           onClick={() => void handleSave(user)}
                         >
                           {savingId === user.id ? "Saving…" : "Save"}

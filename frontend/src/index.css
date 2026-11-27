@@ -135,6 +135,11 @@
     @apply border border-line bg-surface text-ink hover:bg-surface-muted focus-visible:ring-accent;
   }
 
+  /* Marks a pending change that is ready to be committed. */
+  .btn-ready {
+    @apply border border-accent bg-accent/5 text-accent-ink hover:bg-accent/10 focus-visible:ring-accent;
+  }
+
   .btn-ghost {
     @apply text-muted hover:bg-ink/5 hover:text-ink focus-visible:ring-accent;
   }

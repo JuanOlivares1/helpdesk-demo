@@ -23,12 +23,18 @@ test("creates a user and changes access from the directory", async ({
   const row = page.locator("tbody tr").filter({ hasText: email });
   await expect(row).toBeVisible();
 
+  const save = row.getByRole("button", { name: "Save" });
+  await expect(save).toBeDisabled();
   await row.getByLabel(`Role for ${email}`).selectOption("client");
-  await row.getByRole("button", { name: "Save" }).click();
+  await expect(save).toBeEnabled();
+  await expect(save).toHaveClass(/btn-ready/);
+  await save.click();
 
   await expect(row.getByText("Access updated.")).toBeVisible();
   await expect(row.getByLabel(`Role for ${email}`)).toHaveValue("client");
   await expect(row.locator("span.badge")).toHaveText("Client");
+  await expect(save).toBeDisabled();
+  await expect(save).not.toHaveClass(/btn-ready/);
 });
 
 test("shows inline field errors from a 422 response", async ({ page }) => {

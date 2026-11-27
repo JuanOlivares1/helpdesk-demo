@@ -6,6 +6,7 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 
 - Tasks 1–13: `AGENTS.md`/`MEMORY.md`, UI audit, assignees, UTC + migration `c4f1a9b2d7e3`, HTTP smoke, Playwright (disposable DB, ports 5001/5174), admin users API + `/users` UI, unassignment, `bcrypt` removal, Vitest, Docker Compose verification with Windows Docker Desktop.
 - Task 14 done: dark mode + deep-wine accent, three-state theme selector and AA contrast fixes across the SPA.
+- Task 15 done: in `/users`, a pending role change highlights Save with `.btn-ready` (wine border + 5% tint); the E2E asserts the enabled/disabled transition.
 - Theme lives in `index.css`: semantic tokens overridden under `html.dark`, `@custom-variant dark (&:where(.dark, .dark *))`, pre-paint script in `index.html`, `theme-color` meta updated with the theme.
 - Selector in `Navbar.tsx` cycles system → light → dark, stores the choice in `localStorage.theme`, and follows `matchMedia` only while `system` is selected.
 - Palette: light accent `#7a1f2b`, dark accent `#b0475f`; auth aside uses `#7a1f2b` in both themes; `success` stays teal so state badges remain distinct from the accent.
