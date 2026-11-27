@@ -201,7 +201,8 @@
   }
 
   .dialog {
-    @apply max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-xl border border-line bg-surface p-6 shadow-xl;
+    /* Tailwind's preflight clears the UA margin that centers modal dialogs. */
+    @apply m-auto max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-xl border border-line bg-surface p-6 shadow-xl;
     overscroll-behavior: contain;
   }
 

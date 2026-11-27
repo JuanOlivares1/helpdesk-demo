@@ -27,6 +27,15 @@ test("creates a ticket from the dialog", async ({ page }) => {
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
 
+  const box = await dialog.boundingBox();
+  const viewport = page.viewportSize();
+  expect(box).not.toBeNull();
+  expect(viewport).not.toBeNull();
+  if (box && viewport) {
+    expect(Math.abs(box.x + box.width / 2 - viewport.width / 2)).toBeLessThan(2);
+    expect(Math.abs(box.y + box.height / 2 - viewport.height / 2)).toBeLessThan(2);
+  }
+
   const title = `E2E request ${Date.now()}`;
   await dialog.getByLabel("Title").fill(title);
   await dialog.getByLabel("Description").fill("Created during the E2E run.");
