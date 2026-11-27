@@ -31,6 +31,7 @@ Memory between sessions. Keep it under ~50 lines; summarize or remove what no lo
 - `text-ink/45`, `/55` and `/60` fail 4.5:1 on light surfaces; use `text-muted`/`text-faint` tokens.
 - White text at reduced opacity on dark `#b0475f` fails AA; the deeper aside wine keeps it legible.
 - Image generation failed with `Invalid credential`; do not claim a visual match without inspecting pixels.
+- OpenCode plugin fix: global deprecated `plugin: ["@warp-dot-dev/opencode-warp@0.1.7"]` loaded a V1-only build with no default export; both deprecated `plugin` blocks were removed and one global V2 `plugins` entry kept. `opencode plugin list` now shows only context7 and opencode-warp 0.2.0; no credentials involved.
 
 ## Decisiones (y por qué)
 
